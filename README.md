@@ -3,7 +3,7 @@
 ## 使用说明
 在api目录下存放要mock的数据文件, md格式, 默认端口5000
 ### 启动程序
-`source venv/bin/acticate`  
+`pip install --no-index --find-links=libs -r requirements.txt`  
 `python main.py`
 
 ## mock文件格式
