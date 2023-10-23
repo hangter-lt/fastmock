@@ -4,7 +4,7 @@
 在api目录下存放要mock的数据文件, md格式, 默认端口5000
 ### 启动程序
 `source venv/bin/acticate`  
-`python run main.py`
+`python main.py`
 
 ## mock文件格式
 后缀.md, 文件名无要求
@@ -52,7 +52,7 @@
 
 
 # TODO:
-支持配置文件,自定义接口等  
+支持配置文件,自定义端口等  
 监控api文件,变更后自动更新  
 增加日志  
 支持动态参数  
