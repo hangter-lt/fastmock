@@ -34,7 +34,7 @@ def api(path):
     match content_type:
         case "":
             params.update(dict(request.form))
-            params.update(request.get_data())
+            params.update(dict(request.get_json()))
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -46,8 +46,9 @@ def api(path):
             data = xmltodict.parse(data)
             params.update(data)
         case _:
+            # TODO: 优化,自适应参数格式 
             params.update(dict(request.form))
-            params.update(request.get_data())
+            params.update(dict(request.get_json()))
 
     print("params")
     print(params)
