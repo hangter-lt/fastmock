@@ -11,6 +11,7 @@ content = {}
 
 @app.route("/<path:path>", methods=methods)
 def api(path):
+    print(path)
     uri = "/" + path
     a = content.get(uri)
     # 匹配路由参数,目前仅支持末端路由匹配
@@ -34,7 +35,10 @@ def api(path):
     match content_type:
         case "":
             params.update(dict(request.form))
-            params.update(dict(request.get_json()))
+            try:
+                params.update(dict(request.get_json()))
+            except:
+                pass
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -48,7 +52,11 @@ def api(path):
         case _:
             # TODO: 优化,自适应参数格式 
             params.update(dict(request.form))
-            params.update(dict(request.get_json()))
+            try:
+                params.update(dict(request.get_json()))
+            except:
+                pass
+
 
     print("params")
     print(params)
