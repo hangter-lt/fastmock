@@ -71,5 +71,5 @@ def api(path):
         type = {"Content-Type": result.content_type}
     
 
-    return result.value, code, type
+    return result.content, code, type
 

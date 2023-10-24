@@ -11,8 +11,8 @@
 配置文件借助markdown格式,使用其中几个字符进行匹配操作:
 1. "*": 用于匹配通用参数(uri,method)
 2. "-": 用于匹配请求参数(route,headers,params)
-3. "+": 用于匹配响应参数(code,content-type,value)
-4. "``````": 代码段,用于匹配headers,params,value内容
+3. "+": 用于匹配响应参数(code,content-type,content)
+4. "``````": 代码段,用于匹配headers,params,content内容
 5. "``": 代码块,用于匹配uri,method,route,code,content-type内容
 6. "---": 行分割符,用于匹配多对请求和响应的内容  
 除以上符号外,其他md语法不参与匹配,可用于注释自由填充
@@ -37,7 +37,7 @@
 + code `200`          // 响应码,可选,默认为200
 + content-type        // 响应类型,可选,支持json,xml,text,html...
 `application/json`
-+ value               // 响应内容,可选,支持text,json,xml
++ content               // 响应内容,可选,支持text,json,xml
 ```
 {
     "hello": "world"

@@ -8,7 +8,7 @@
 1. 匹配/api/v1/hello/python, 响应hello, python
 -----------
 - route `python`
-+ value
++ content
 ```
 hello, python
 ```
@@ -28,7 +28,7 @@ hello, python
 }
 ```
 + content-type `application/xml`
-+ value 
++ content
 ```xml
 <root>
     <hello>golang</hello>

@@ -13,7 +13,7 @@
     "id": 1
 }
 ```
-+ value
++ content
 ```
 hello, world
 ```
@@ -33,7 +33,7 @@ hello, world
 }
 ```
 + content-type `application/json`
-+ value 
++ content
 ```json
 {
     "hello": "world"

@@ -35,7 +35,7 @@ class Api():
             def __init__(self) -> None:
                 self.code = 0
                 self.content_type = ""
-                self.value = ""
+                self.content = ""
 
 # 解析文件内容
 def parsefile(lines):
@@ -153,7 +153,7 @@ def parsefile(lines):
                         response.content_type = res[0] 
  
                 # match res data
-                if lines[i].startswith("- value"):
+                if lines[i].startswith("- content"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -167,7 +167,7 @@ def parsefile(lines):
                         if len(con) != "":
                             con = re.sub(pattern_json_comma, "", con, 0)
                             # con = json.loads(con, strict=False)
-                            response.value = con
+                            response.content = con
                 # match next
                 if  i == len(lines) or lines[i].startswith("---"):
                     break
