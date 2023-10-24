@@ -153,7 +153,7 @@ def parsefile(lines):
                         response.content_type = res[0] 
  
                 # match res data
-                if lines[i].startswith("- content"):
+                if lines[i].startswith("- content") and not lines[i].startswith("- content-"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1

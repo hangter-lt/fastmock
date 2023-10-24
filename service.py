@@ -27,6 +27,8 @@ def api(path):
     # 获取请求内容
     headers = dict(request.headers)
     params = dict(request.args)
+    print("params")
+    print(params)
     
     content_type = request.headers.get("Content-Type")
     match content_type:
@@ -43,7 +45,13 @@ def api(path):
             data = request.get_data()
             data = xmltodict.parse(data)
             params.update(data)
-            
+        case _:
+            params.update(dict(request.form))
+            params.update(request.get_())
+
+    print("params")
+    print(params)
+    
     results = []
     # 校验请求内容
     for data in a.datas:
@@ -70,6 +78,9 @@ def api(path):
     if result.content_type != "":
         type = {"Content-Type": result.content_type}
     
+
+    print("response")
+    print(result.content)
 
     return result.content, code, type
 
