@@ -27,14 +27,14 @@ def api(path):
     # 获取请求内容
     headers = dict(request.headers)
     params = dict(request.args)
-    print("params")
-    print(params)
+    print("headers")
+    print(headers)
     
     content_type = request.headers.get("Content-Type")
     match content_type:
         case "":
             params.update(dict(request.form))
-            params.update(request.get_json())
+            params.update(request.get_data())
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -47,7 +47,7 @@ def api(path):
             params.update(data)
         case _:
             params.update(dict(request.form))
-            params.update(request.get_())
+            params.update(request.get_data())
 
     print("params")
     print(params)
