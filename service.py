@@ -1,23 +1,46 @@
 from flask import Flask, request, abort
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 import random
 import xmltodict
+import g
 
 app = Flask(__name__)
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
-content = {}
 
+class MyHandler(FileSystemEventHandler):
+    # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
+    # 通过另一个全局变量记录队列最后一位
+    def on_created(self, event):
+        if not event.is_directory:
+            if event.src_path != g.queue_end:
+                g.queue_update_files.put(event.src_path)
+                g.queue_end = event.src_path
+            print("创建了文件")
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            if event.src_path != g.queue_end:
+                g.queue_update_files.put(event.src_path)
+                g.queue_end = event.src_path
+            print("文件发生了改变！")
+
+    def on_deleted(self, event):
+        if not event.is_directory:
+            g.queue_delete_files.put(event.src_path)
+            print("删除了文件！")
 
 @app.route("/<path:path>", methods=methods)
 def api(path):
     print(path)
     uri = "/" + path
-    a = content.get(uri)
+    a = g.content.get(uri)
     # 匹配路由参数,目前仅支持末端路由匹配
     if not a:
         uri = "/".join(uri.split("/")[:-1] + [":"])
-        a = content.get(uri)
+        a = g.content.get(uri)
         if not a:
             abort(404)
 
