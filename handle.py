@@ -28,6 +28,7 @@ class Api():
         class Request():
             def __init__(self) -> None:
                 self.route = ""
+                self.method = ""
                 self.headers = {}
                 self.params = {}
 
@@ -88,7 +89,21 @@ def parsefile(lines):
                                 request.route = res[0]
                                 break
                     else:
-                        response.route = res[0] 
+                        request.route = res[0] 
+
+                # match req method
+                if lines[i].startswith("+ method"):
+                    res = re.findall(pattern_value, lines[i])
+                    if len(res) == 0:
+                        while i<len(lines):
+                            res = re.findall(pattern_value, lines[i])
+                            if len(res) == 0:
+                                i += 1
+                            else:
+                                request.method = res[0]
+                                break
+                    else:
+                        request.method = res[0] 
     
                 # match req headers
                 if lines[i].startswith("+ headers"):
