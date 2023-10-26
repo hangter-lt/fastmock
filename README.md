@@ -21,23 +21,24 @@
 * uri `/hello/:`     // 必填, :代指路由参数占位符,有:时请求参数route必填
 * method `GET|POST`  // 可选,可多个
 ------               // 分割一组请求和响应
-- route `apiname`    // 路由参数,可选,uri中有:时生效
-- headers            // 请求头,可选,写入时参与匹配,json格式
++ route `apiname`    // 路由参数,可选,uri中有:时生效
++ method `GET`       // 本组请求增加method匹配,可多个
++ headers            // 请求头,可选,写入时参与匹配,json格式
 ```json              // 代码块语言不影响内容
 {
     "ApiName": "hello"
 }
 ```
-- params              // 请求参数,可选,写入时参数匹配,json格式
++ params              // 请求参数,可选,写入时参数匹配,json格式
 ```
 {
     "hello": "world"
 }
 ```
-+ code `200`          // 响应码,可选,默认为200
-+ content-type        // 响应类型,可选,支持json,xml,text,html...
+- code `200`          // 响应码,可选,默认为200
+- content-type        // 响应类型,可选,支持json,xml,text,html...
 `application/json`
-+ content               // 响应内容,可选,支持text,json,xml
+- content               // 响应内容,可选,支持text,json,xml
 ```
 {
     "hello": "world"

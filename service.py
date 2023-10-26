@@ -68,6 +68,11 @@ def api(path):
         if data.request.route != "":
             if path.split("/")[-1] != data.request.route:
                 continue
+
+        # 校验组内method
+        if data.request.method != "":
+            if request.method not in data.request.method:
+                continue    
         
         # 校验headers
         if not data.request.headers.items() <= headers.items():
