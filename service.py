@@ -64,6 +64,11 @@ def api(path):
     results = []
     # 校验请求内容
     for data in a.datas:
+        # 校验route
+        if data.request.route != "":
+            if path.split("/")[-1] != data.request.route:
+                continue
+        
         # 校验headers
         if not data.request.headers.items() <= headers.items():
             continue

@@ -88,7 +88,7 @@ def parsefile(lines):
                                 request.route = res[0]
                                 break
                     else:
-                        response.route = res[0] 
+                        request.route = res[0] 
     
                 # match req headers
                 if lines[i].startswith("+ headers"):
