@@ -39,7 +39,7 @@
 - code `200`          // 响应码,可选,默认为200
 - content-type        // 响应类型,可选,支持json,xml,text,html...
 `application/json`
-- content               // 响应内容,可选,支持text,json,xml
++ content             // 响应内容,可选,支持text,json,xml
 ```
 {
     "hello": "world"

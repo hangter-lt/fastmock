@@ -1,6 +1,8 @@
 import os
 import re
 import json
+import time
+import g
 
 
 pattern_value = f"`(.+?)`"
@@ -192,3 +194,16 @@ def parsefile(lines):
             data.response = response 
             a.datas.append(data)
     return a
+
+def updatefile():
+    while True:
+        # 更新
+        if g.queue_files.empty():
+            g.queue_end = ""
+        filename = g.queue_files.get()
+        with open(filename, 'r', encoding='UTF-8') as f:
+            a = parsefile(f.readlines())
+            g.content[a.uri] = a
+            print(filename, "已更新")
+        
+        time.sleep(1)
