@@ -1,7 +1,7 @@
 # fastmock
 
 ## 使用说明
-在api目录下存放要mock的数据文件, md格式, 默认端口5000
+在api目录下存放要mock的数据文件, md格式, 默认端口5000, 支持配置文件热更新
 ### 启动程序
 `pip install --no-index --find-links=libs -r requirements.txt`  
 `python main.py`
@@ -56,7 +56,6 @@
 
 # TODO:
 支持配置文件,自定义端口等  
-监控api文件,变更后自动更新  
 增加日志  
 支持动态参数  
 ...
