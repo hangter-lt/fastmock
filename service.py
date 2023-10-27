@@ -16,21 +16,17 @@ class MyHandler(FileSystemEventHandler):
     def on_created(self, event):
         if not event.is_directory:
             if event.src_path != g.queue_end:
-                g.queue_update_files.put(event.src_path)
+                g.queue_files.put(event.src_path)
                 g.queue_end = event.src_path
-            print("创建了文件")
+            print("创建了文件", event.src_path)
 
     def on_modified(self, event):
         if not event.is_directory:
             if event.src_path != g.queue_end:
-                g.queue_update_files.put(event.src_path)
+                g.queue_files.put(event.src_path)
                 g.queue_end = event.src_path
-            print("文件发生了改变！")
+            print("改变了文件", event.src_path)
 
-    def on_deleted(self, event):
-        if not event.is_directory:
-            g.queue_delete_files.put(event.src_path)
-            print("删除了文件！")
 
 @app.route("/<path:path>", methods=methods)
 def api(path):
