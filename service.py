@@ -52,12 +52,6 @@ def api(path):
     
     content_type = request.headers.get("Content-Type")
     match content_type:
-        case "":
-            params.update(dict(request.form))
-            try:
-                params.update(dict(request.get_json()))
-            except:
-                pass
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -69,13 +63,24 @@ def api(path):
             data = xmltodict.parse(data)
             params.update(data)
         case _:
-            # TODO: 优化,自适应参数格式 
-            params.update(dict(request.form))
-            try:
-                params.update(dict(request.get_json()))
-            except:
-                pass
-
+            # 自适应参数类型
+            # form格式
+            data = request.form
+            if data := "":
+                # json格式
+                try:
+                    data = dict(request.get_json())
+                except:
+                    pass
+                # xml格式
+                try:
+                    data =  request.get_data()
+                    data = xmltodict.parse(data)
+                except:
+                    pass
+            else:
+                data = dict(data)
+            
 
     print("params")
     print(params)
