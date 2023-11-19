@@ -63,12 +63,23 @@ def api(path):
             data = xmltodict.parse(data)
             params.update(data)
         case _:
-            # TODO: 优化,自适应参数格式 
-            params.update(dict(request.form))
-            try:
-                params.update(dict(request.get_json()))
-            except:
-                pass
+            # 自适应参数类型
+            # form格式
+            data = request.form
+            if data := "":
+                # json格式
+                try:
+                    data = dict(request.get_json())
+                except:
+                    pass
+                # xml格式
+                try:
+                    data =  request.get_data()
+                    data = xmltodict.parse(data)
+                except:
+                    pass
+            else:
+                data = dict(data)
 
     g.logger.info("请求参数: %s\n", params)
 
