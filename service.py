@@ -5,7 +5,6 @@ import random
 import xmltodict
 import g
 
-app = Flask(__name__)
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
@@ -16,39 +15,40 @@ class MyHandler(FileSystemEventHandler):
     def on_created(self, event):
         if not event.is_directory:
             if event.src_path != g.queue_end:
+                g.logger.info("检测到接口创建: %s", event.src_path)
                 g.queue_files.put(event.src_path)
                 g.queue_end = event.src_path
-            print("创建了文件", event.src_path)
 
     def on_modified(self, event):
         if not event.is_directory:
             if event.src_path != g.queue_end:
+                g.logger.info("检测到接口文件更新: %s", event.src_path)
                 g.queue_files.put(event.src_path)
                 g.queue_end = event.src_path
-            print("改变了文件", event.src_path)
 
 
-@app.route("/<path:path>", methods=methods)
+@g.app.route("/<path:path>", methods=methods)
 def api(path):
-    print(path)
     uri = "/" + path
+    g.logger.info("请求路由: %s", uri)
     a = g.content.get(uri)
     # 匹配路由参数,目前仅支持末端路由匹配
     if not a:
         uri = "/".join(uri.split("/")[:-1] + [":"])
         a = g.content.get(uri)
         if not a:
+            g.logger.warn("路由: %s匹配失败", '/' + path)
             abort(404)
 
     # 校验请求方法
     if a.method != "" and request.method not in a.method:
+        g.logger.warn("路由: %s, 请求方法未匹配成功")
         abort(404)
 
     # 获取请求内容
     headers = dict(request.headers)
     params = dict(request.args)
-    print("headers")
-    print(headers)
+    g.logger.info("请求头: %s\n", headers)
     
     content_type = request.headers.get("Content-Type")
     match content_type:
@@ -63,28 +63,15 @@ def api(path):
             data = xmltodict.parse(data)
             params.update(data)
         case _:
-            # 自适应参数类型
-            # form格式
-            data = request.form
-            if data := "":
-                # json格式
-                try:
-                    data = dict(request.get_json())
-                except:
-                    pass
-                # xml格式
-                try:
-                    data =  request.get_data()
-                    data = xmltodict.parse(data)
-                except:
-                    pass
-            else:
-                data = dict(data)
-            
+            # TODO: 优化,自适应参数格式 
+            params.update(dict(request.form))
+            try:
+                params.update(dict(request.get_json()))
+            except:
+                pass
 
-    print("params")
-    print(params)
-    
+    g.logger.info("请求参数: %s\n", params)
+
     results = []
     # 校验请求内容
     for data in a.datas:
@@ -109,6 +96,7 @@ def api(path):
 
     # 响应内容
     if len(results) == 0:
+        g.logger.warn("路由: %s未匹配到内容",uri)
         return ""
         
     result = results[random.randint(0,len(results)-1)]
@@ -122,8 +110,9 @@ def api(path):
         type = {"Content-Type": result.content_type}
     
 
-    print("response")
-    print(result.content)
+    g.logger.info("响应码: %s", code)
+    g.logger.info("响应类型: %s", type)
+    g.logger.info("响应内容: %s\n", result.content)
 
     return result.content, code, type
 

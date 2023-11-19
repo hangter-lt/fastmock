@@ -204,6 +204,6 @@ def updatefile():
         with open(filename, 'r', encoding='UTF-8') as f:
             a = parsefile(f.readlines())
             g.content[a.uri] = a
-            print(filename, "已更新")
+            g.logger.info("接口文件: %s已更新", filename)
         
         time.sleep(1)
