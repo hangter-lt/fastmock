@@ -1,10 +1,9 @@
-from flask import Flask, request, abort
-from watchdog.observers import Observer
+from flask import request, abort
 from watchdog.events import FileSystemEventHandler
 import random
 import xmltodict
 import g
-
+import db
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
@@ -29,6 +28,13 @@ class MyHandler(FileSystemEventHandler):
 
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
+    reqres = {
+        "uri": "/"+path,
+        "method": request.method,
+        "header": request.headers,
+        "result": "faild",
+    }
+
     uri = "/" + path
     g.logger.info("请求路由: %s", uri)
     a = g.content.get(uri)
@@ -37,12 +43,16 @@ def api(path):
         uri = "/".join(uri.split("/")[:-1] + [":"])
         a = g.content.get(uri)
         if not a:
-            g.logger.warn("路由: %s匹配失败", '/' + path)
+            g.logger.warn("路由: %s未匹配成功", '/' + path)
+            reqres["reason"] = "路由未匹配成功"
+            db.insertReqres(reqres)
             abort(404)
 
     # 校验请求方法
     if a.method != "" and request.method not in a.method:
         g.logger.warn("路由: %s, 请求方法未匹配成功")
+        reqres["reason"] = "请求方法未匹配成功"
+        db.insertReqres(reqres)
         abort(404)
 
     # 获取请求内容
@@ -81,6 +91,7 @@ def api(path):
             else:
                 data = dict(data)
 
+    reqres["params"] = params
     g.logger.info("请求参数: %s\n", params)
 
     results = []
@@ -108,6 +119,8 @@ def api(path):
     # 响应内容
     if len(results) == 0:
         g.logger.warn("路由: %s未匹配到内容",uri)
+        reqres["reason"] = "未匹配到内容"
+        db.insertReqres(reqres)
         return ""
         
     result = results[random.randint(0,len(results)-1)]
@@ -125,5 +138,10 @@ def api(path):
     g.logger.info("响应类型: %s", type)
     g.logger.info("响应内容: %s\n", result.content)
 
+    reqres["code"] = code
+    reqres["content_type"] = result.content_type
+    reqres["content"] = result.content
+    reqres["result"] = "success"
+    db.insertReqres(reqres)
     return result.content, code, type
 
