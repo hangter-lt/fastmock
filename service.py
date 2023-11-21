@@ -1,9 +1,10 @@
-from flask import request, abort
+from flask import request, abort, Response
 import random
 import xmltodict
 import g
 import db
 import json
+import time
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
@@ -26,16 +27,16 @@ def api(path):
         if not a:
             g.logger.warn("路由: %s未匹配成功", '/' + path)
             reqres.reason = "路由未匹配成功"
-            # db.insertReqres(reqres)
             reqres.insert()
+            g.list_reqres.append(reqres)
             abort(404)
 
     # 校验请求方法
     if a.method != "" and request.method not in a.method:
         g.logger.warn("路由: %s, 请求方法未匹配成功")
         reqres.reason = "请求方法未匹配成功"
-        # db.insertReqres(reqres)
         reqres.insert()
+        g.list_reqres.append(reqres)
         abort(404)
 
     # 获取请求内容
@@ -103,8 +104,8 @@ def api(path):
     if len(results) == 0:
         g.logger.warn("路由: %s未匹配到内容",uri)
         reqres.reason = "未匹配到内容"
-        # db.insertReqres(reqres)
         reqres.insert()
+        g.list_reqres.append(reqres)
         return ""
         
     result = results[random.randint(0,len(results)-1)]
@@ -126,15 +127,32 @@ def api(path):
     reqres.content_type = result.content_type
     reqres.content = result.content
     reqres.result = "success"
-    # db.insertReqres(reqres)
     reqres.insert()
+    g.list_reqres.append(reqres)
     return result.content, code, type
 
 
-@g.app.route("/api/mocks/<id>")
+@g.app.route("/api/mocks/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
     reqres.query_one(id)
     return json.dumps(reqres.__dict__)
 
-
+@g.app.route("/api/requests", methods=["GET"])
+def list():
+    
+    def eventStream():
+        i = 0
+        while True:
+            if i >= len(g.list_reqres):
+                time.sleep(1)
+                continue
+            reqres = g.list_reqres[i]
+            res = {
+                "id": reqres.id,
+                "uri": reqres.uri,
+                "method": reqres.method,
+            }
+            i += 1
+            yield json.dumps(res)
+    return Response(eventStream(), mimetype="text/event-stream")

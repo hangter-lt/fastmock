@@ -3,6 +3,9 @@ import logging
 from flask import Flask
 from flask.logging import default_handler 
 
+# 全局列表,存储请求响应内容reqres
+list_reqres = []
+
 # 全局队列,变动的文件
 queue_files = queue.SimpleQueue()
 

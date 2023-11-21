@@ -34,6 +34,9 @@ class TableReqRes():
         )
         conn.commit()
         conn.close()
+
+        self.id = cursor.lastrowid
+
     
     def query_one(self, id):
         self.id = id
