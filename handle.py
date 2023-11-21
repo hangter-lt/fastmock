@@ -3,6 +3,8 @@ import re
 import json
 import time
 import g
+from watchdog.events import FileSystemEventHandler
+
 
 
 pattern_value = f"`(.+?)`"
@@ -207,3 +209,20 @@ def updatefile():
             g.logger.info("接口文件: %s已更新", filename)
         
         time.sleep(1)
+
+class MyHandler(FileSystemEventHandler):
+    # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
+    # 通过另一个全局变量记录队列最后一位
+    def on_created(self, event):
+        if not event.is_directory:
+            if event.src_path != g.queue_end:
+                g.logger.info("检测到接口创建: %s", event.src_path)
+                g.queue_files.put(event.src_path)
+                g.queue_end = event.src_path
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            if event.src_path != g.queue_end:
+                g.logger.info("检测到接口文件更新: %s", event.src_path)
+                g.queue_files.put(event.src_path)
+                g.queue_end = event.src_path

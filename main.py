@@ -1,6 +1,5 @@
 import threading
 import handle
-import service
 import init
 import g
 from watchdog.observers import Observer
@@ -20,7 +19,7 @@ if __name__ == "__main__":
     g.logger.info("解析接口文件完成")
 
     # 监视配置文件增删改
-    event_handler = service.MyHandler()
+    event_handler = handle.MyHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()

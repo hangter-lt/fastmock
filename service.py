@@ -1,5 +1,4 @@
 from flask import request, abort
-from watchdog.events import FileSystemEventHandler
 import random
 import xmltodict
 import g
@@ -8,22 +7,6 @@ import db
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
 
-class MyHandler(FileSystemEventHandler):
-    # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
-    # 通过另一个全局变量记录队列最后一位
-    def on_created(self, event):
-        if not event.is_directory:
-            if event.src_path != g.queue_end:
-                g.logger.info("检测到接口创建: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
-
-    def on_modified(self, event):
-        if not event.is_directory:
-            if event.src_path != g.queue_end:
-                g.logger.info("检测到接口文件更新: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
 
 
 @g.app.route("/<path:path>", methods=methods)
