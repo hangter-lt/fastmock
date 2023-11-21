@@ -6,11 +6,9 @@ import db
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
-
-
-
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
+    print(path)
     reqres = {
         "uri": "/"+path,
         "method": request.method,
@@ -127,4 +125,9 @@ def api(path):
     reqres["result"] = "success"
     db.insertReqres(reqres)
     return result.content, code, type
+
+
+# @g.app.route("/api/mocks/<id>")
+# def info(id):
+#     db.queryReqres(1)
 

@@ -2,3 +2,4 @@ api/
 __pycache__/
 venv/
 api.log
+mock.db

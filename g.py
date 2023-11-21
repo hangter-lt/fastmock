@@ -29,6 +29,7 @@ flt = logging.Filter("api")
 # app
 app = Flask(__name__)
 app.debug = False
+app.logger.setLevel(logging.DEBUG)
 app.logger.removeHandler (default_handler)
 app.logger.addHandler(sh)
 app.logger.addHandler(fh)

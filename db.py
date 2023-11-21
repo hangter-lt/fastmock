@@ -23,3 +23,16 @@ def insertReqres(data:dict):
     )
     conn.commit()
     conn.close()
+
+def queryReqres(id:int):
+    conn = sqlite3.connect("mock.db")
+    cursor = conn.cursor()
+
+    data = cursor.execute(
+        # '''SELECT id, uri, method, header, params, code, content_type, content, result, reason FROM reqres WHERE id = (?);''', (id)
+        '''SELECT id, uri, method, header, params, code, content_type, content, result, reason FROM reqres;'''
+    )
+
+    print(data)
+    
+    conn.close()
