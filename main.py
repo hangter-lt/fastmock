@@ -1,9 +1,9 @@
 import threading
 import handle
+import service
 import init
 import g
 from watchdog.observers import Observer
-
 
 if __name__ == "__main__":
     path = "./api"

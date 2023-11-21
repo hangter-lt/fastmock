@@ -12,7 +12,6 @@ queue_end = ""
 # content
 content = {}
 
-
 # 日志配置
 sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter(

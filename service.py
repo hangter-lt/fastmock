@@ -3,18 +3,18 @@ import random
 import xmltodict
 import g
 import db
+import json
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
+
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
-    print(path)
-    reqres = {
-        "uri": "/"+path,
-        "method": request.method,
-        "header": request.headers,
-        "result": "faild",
-    }
+    reqres = db.TableReqRes()
+    reqres.uri = "/" + path
+    reqres.method = request.method
+    reqres.header = request.headers
+    reqres.result = "faild"
 
     uri = "/" + path
     g.logger.info("请求路由: %s", uri)
@@ -25,15 +25,17 @@ def api(path):
         a = g.content.get(uri)
         if not a:
             g.logger.warn("路由: %s未匹配成功", '/' + path)
-            reqres["reason"] = "路由未匹配成功"
-            db.insertReqres(reqres)
+            reqres.reason = "路由未匹配成功"
+            # db.insertReqres(reqres)
+            reqres.insert()
             abort(404)
 
     # 校验请求方法
     if a.method != "" and request.method not in a.method:
         g.logger.warn("路由: %s, 请求方法未匹配成功")
-        reqres["reason"] = "请求方法未匹配成功"
-        db.insertReqres(reqres)
+        reqres.reason = "请求方法未匹配成功"
+        # db.insertReqres(reqres)
+        reqres.insert()
         abort(404)
 
     # 获取请求内容
@@ -72,7 +74,7 @@ def api(path):
             else:
                 data = dict(data)
 
-    reqres["params"] = params
+    reqres.params = params
     g.logger.info("请求参数: %s\n", params)
 
     results = []
@@ -100,8 +102,9 @@ def api(path):
     # 响应内容
     if len(results) == 0:
         g.logger.warn("路由: %s未匹配到内容",uri)
-        reqres["reason"] = "未匹配到内容"
-        db.insertReqres(reqres)
+        reqres.reason = "未匹配到内容"
+        # db.insertReqres(reqres)
+        reqres.insert()
         return ""
         
     result = results[random.randint(0,len(results)-1)]
@@ -119,15 +122,19 @@ def api(path):
     g.logger.info("响应类型: %s", type)
     g.logger.info("响应内容: %s\n", result.content)
 
-    reqres["code"] = code
-    reqres["content_type"] = result.content_type
-    reqres["content"] = result.content
-    reqres["result"] = "success"
-    db.insertReqres(reqres)
+    reqres.code = code
+    reqres.content_type = result.content_type
+    reqres.content = result.content
+    reqres.result = "success"
+    # db.insertReqres(reqres)
+    reqres.insert()
     return result.content, code, type
 
 
-# @g.app.route("/api/mocks/<id>")
-# def info(id):
-#     db.queryReqres(1)
+@g.app.route("/api/mocks/<id>")
+def info(id):
+    reqres = db.TableReqRes()
+    reqres.query_one(id)
+    return json.dumps(reqres.__dict__)
+
 
