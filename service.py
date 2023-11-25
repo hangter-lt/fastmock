@@ -132,7 +132,7 @@ def api(path):
     return result.content, code, type
 
 
-@g.app.route("/api/mocks/<id>", methods=["GET"])
+@g.app.route("/api/requests/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
     reqres.query_one(id)
@@ -154,5 +154,6 @@ def list():
                 "method": reqres.method,
             }
             i += 1
-            yield json.dumps(res)
+            # 符合前端接受规范流传递
+            yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
     return Response(eventStream(), mimetype="text/event-stream")
