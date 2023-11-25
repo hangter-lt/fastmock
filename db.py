@@ -48,7 +48,7 @@ class TableReqRes():
                 SELECT uri, method, header, params, code, content_type, content, result, reason 
                 FROM reqres 
                 WHERE id = ?;''', 
-            (str(self.id))
+            (str(self.id),)
         )
 
         data = data.fetchone()

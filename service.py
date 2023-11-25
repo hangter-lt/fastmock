@@ -27,6 +27,7 @@ def api(path):
         if not a:
             g.logger.warn("路由: %s未匹配成功", '/' + path)
             reqres.reason = "路由未匹配成功"
+            reqres.code = 404
             reqres.insert()
             g.list_reqres.append(reqres)
             abort(404)
@@ -35,6 +36,7 @@ def api(path):
     if a.method != "" and request.method not in a.method:
         g.logger.warn("路由: %s, 请求方法未匹配成功")
         reqres.reason = "请求方法未匹配成功"
+        reqres.code = 404
         reqres.insert()
         g.list_reqres.append(reqres)
         abort(404)
@@ -75,7 +77,7 @@ def api(path):
             else:
                 data = dict(data)
 
-    reqres.params = params
+    reqres.params = json.dumps(params)
     g.logger.info("请求参数: %s\n", params)
 
     results = []
@@ -104,9 +106,10 @@ def api(path):
     if len(results) == 0:
         g.logger.warn("路由: %s未匹配到内容",uri)
         reqres.reason = "未匹配到内容"
+        reqres.code = 200
         reqres.insert()
         g.list_reqres.append(reqres)
-        return ""
+        return "", 200, {}       
         
     result = results[random.randint(0,len(results)-1)]
     
