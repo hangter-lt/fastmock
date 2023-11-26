@@ -160,3 +160,8 @@ def list():
             # 符合前端接受规范流传递
             yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
     return Response(eventStream(), mimetype="text/event-stream")
+
+@g.app.route("/api/tree", methods=["GET"])
+def dir_tree():
+    return json.dumps(g.dir_tree["children"])
+    

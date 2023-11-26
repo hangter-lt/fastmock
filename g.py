@@ -6,6 +6,9 @@ from flask.logging import default_handler
 # 全局列表,存储请求响应内容reqres
 list_reqres = []
 
+# api配置文件目录树
+dir_tree = {}
+
 # 全局队列,变动的文件
 queue_files = queue.SimpleQueue()
 
