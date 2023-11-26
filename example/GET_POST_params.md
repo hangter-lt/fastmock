@@ -7,33 +7,33 @@
 
 1. 匹配/api/v1/hello/world 参数id=1 响应hello, world
 -----------
-- params
++ params
 ```java
 {
     "id": 1
 }
 ```
-+ content
+- content
 ```
 hello, world
 ```
 
 2. 匹配/api/v1/hello/world 参数id=2, 响应json
 -----------
-- params
++ params
 ```json
 {
     "id": 2
 }
 ```
-- headers
++ headers
 ```
 {
     "Accept": "application/json"
 }
 ```
-+ content-type `application/json`
-+ content
+- content-type `application/json`
+- content
 ```json
 {
     "hello": "world"
