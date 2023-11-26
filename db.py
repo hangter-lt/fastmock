@@ -1,4 +1,5 @@
 import sqlite3
+import time
 
 class TableReqRes():
     uri = ""
@@ -10,6 +11,7 @@ class TableReqRes():
     content = ""
     result = ""
     reason = ""
+    time = int(time.time()*1000)
 
     def insert(self):
         conn = sqlite3.connect('mock.db')
@@ -17,8 +19,8 @@ class TableReqRes():
         
         cursor.execute(
             '''
-                INSERT INTO "reqres" ("uri", "method", "header", "params", "code", "content_type", "content", "result", "reason")
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO "reqres" ("uri", "method", "header", "params", "code", "content_type", "content", "result", "reason", "time")
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             ''', 
             (
                 self.uri, 
@@ -30,6 +32,7 @@ class TableReqRes():
                 str(self.content),
                 self.result,
                 self.reason,
+                self.time
             )
         )
         conn.commit()
@@ -45,7 +48,7 @@ class TableReqRes():
 
         data = cursor.execute(
             '''
-                SELECT uri, method, header, params, code, content_type, content, result, reason 
+                SELECT uri, method, header, params, code, content_type, content, result, reason, time 
                 FROM reqres 
                 WHERE id = ?;''', 
             (str(self.id),)
@@ -62,6 +65,7 @@ class TableReqRes():
             self.content = data[6] 
             self.result = data[7] 
             self.reason = data[8] 
+            self.time = data[9]
 
         conn.close()
 

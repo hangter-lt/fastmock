@@ -21,7 +21,8 @@ def init_DB():
             "content_type" TEXT,
             "content" TEXT,
             "result" TEXT,
-            "reason" TEXT                   
+            "reason" TEXT,
+            "time" INTEGER                  
         ); 
     ''')
     conn.commit()
