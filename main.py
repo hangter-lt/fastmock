@@ -1,23 +1,29 @@
 import threading
 import handle
 import service
-import logging
+import init
 import g
+from watchdog.observers import Observer
 
 if __name__ == "__main__":
     path = "./api"
+
+    init.init_DB()
 
     g.logger.info("解析接口文件开始")
     for filename in handle.findAllFile(path):
         with open(filename, 'r', encoding='UTF-8') as f:
             a = handle.parsefile(f.readlines())
             g.content[a.uri] = a
-            g.logger.info("接口文件: %s已更新", filename)
+            g.logger.info("api: %s", a.uri)
     g.logger.info("解析接口文件完成")
 
+    # 生成api配置文件目录树
+    g.dir_tree = handle.get_directory_tree("./api")
+
     # 监视配置文件增删改
-    event_handler = service.MyHandler()
-    observer = service.Observer()
+    event_handler = handle.MyHandler()
+    observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
 
@@ -25,6 +31,6 @@ if __name__ == "__main__":
     t = threading.Thread(target=handle.updatefile)
     t.start()
 
-    g.logger.info("mock接口已启动")
+    g.logger.info("mock接口启动")
     g.app.run()
 

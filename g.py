@@ -3,6 +3,12 @@ import logging
 from flask import Flask
 from flask.logging import default_handler 
 
+# 全局列表,存储请求响应内容reqres
+list_reqres = []
+
+# api配置文件目录树
+dir_tree = {}
+
 # 全局队列,变动的文件
 queue_files = queue.SimpleQueue()
 
@@ -11,7 +17,6 @@ queue_end = ""
 
 # content
 content = {}
-
 
 # 日志配置
 sh = logging.StreamHandler()
@@ -28,7 +33,8 @@ flt = logging.Filter("api")
 
 # app
 app = Flask(__name__)
-app.debug = True
+app.debug = False
+app.logger.setLevel(logging.DEBUG)
 app.logger.removeHandler (default_handler)
 app.logger.addHandler(sh)
 app.logger.addHandler(fh)

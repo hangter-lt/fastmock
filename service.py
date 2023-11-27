@@ -1,34 +1,22 @@
-from flask import Flask, request, abort
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from flask import request, abort, Response
 import random
 import xmltodict
 import g
-
+import db
+import json
+import time
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
 
-class MyHandler(FileSystemEventHandler):
-    # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
-    # 通过另一个全局变量记录队列最后一位
-    def on_created(self, event):
-        if not event.is_directory:
-            if event.src_path != g.queue_end:
-                g.logger.info("检测到接口创建: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
-
-    def on_modified(self, event):
-        if not event.is_directory:
-            if event.src_path != g.queue_end:
-                g.logger.info("检测到接口文件更新: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
-
-
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
+    reqres = db.TableReqRes()
+    reqres.uri = "/" + path
+    reqres.method = request.method
+    reqres.header = request.headers
+    reqres.result = "faild"
+
     uri = "/" + path
     g.logger.info("请求路由: %s", uri)
     a = g.content.get(uri)
@@ -37,12 +25,20 @@ def api(path):
         uri = "/".join(uri.split("/")[:-1] + [":"])
         a = g.content.get(uri)
         if not a:
-            g.logger.warn("路由: %s匹配失败", '/' + path)
+            g.logger.warn("路由: %s未匹配成功", '/' + path)
+            reqres.reason = "路由未匹配成功"
+            reqres.code = 404
+            reqres.insert()
+            g.list_reqres.append(reqres)
             abort(404)
 
     # 校验请求方法
     if a.method != "" and request.method not in a.method:
         g.logger.warn("路由: %s, 请求方法未匹配成功")
+        reqres.reason = "请求方法未匹配成功"
+        reqres.code = 404
+        reqres.insert()
+        g.list_reqres.append(reqres)
         abort(404)
 
     # 获取请求内容
@@ -81,6 +77,7 @@ def api(path):
             else:
                 data = dict(data)
 
+    reqres.params = json.dumps(params)
     g.logger.info("请求参数: %s\n", params)
 
     results = []
@@ -108,7 +105,11 @@ def api(path):
     # 响应内容
     if len(results) == 0:
         g.logger.warn("路由: %s未匹配到内容",uri)
-        return ""
+        reqres.reason = "未匹配到内容"
+        reqres.code = 200
+        reqres.insert()
+        g.list_reqres.append(reqres)
+        return "", 200, {}       
         
     result = results[random.randint(0,len(results)-1)]
     
@@ -125,5 +126,42 @@ def api(path):
     g.logger.info("响应类型: %s", type)
     g.logger.info("响应内容: %s\n", result.content)
 
+    reqres.code = code
+    reqres.content_type = result.content_type
+    reqres.content = result.content
+    reqres.result = "success"
+    reqres.insert()
+    g.list_reqres.append(reqres)
     return result.content, code, type
 
+
+@g.app.route("/api/requests/<id>", methods=["GET"])
+def info(id):
+    reqres = db.TableReqRes()
+    reqres.query_one(id)
+    return json.dumps(reqres.__dict__)
+
+@g.app.route("/api/requests", methods=["GET"])
+def list():
+    
+    def eventStream():
+        i = 0
+        while True:
+            if i >= len(g.list_reqres):
+                time.sleep(1)
+                continue
+            reqres = g.list_reqres[i]
+            res = {
+                "id": reqres.id,
+                "uri": reqres.uri,
+                "method": reqres.method,
+            }
+            i += 1
+            # 符合前端接受规范流传递
+            yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
+    return Response(eventStream(), mimetype="text/event-stream")
+
+@g.app.route("/api/tree", methods=["GET"])
+def dir_tree():
+    return json.dumps(g.dir_tree["children"])
+    
