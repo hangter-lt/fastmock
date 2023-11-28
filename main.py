@@ -19,7 +19,7 @@ if __name__ == "__main__":
     g.logger.info("解析接口文件完成")
 
     # 生成api配置文件目录树
-    g.dir_tree = handle.get_directory_tree("./api")
+    g.dirTree = handle.get_directory_tree("./api")
 
     # 监视配置文件增删改
     event_handler = handle.MyHandler()

@@ -134,13 +134,14 @@ def api(path):
     g.list_reqres.append(reqres)
     return result.content, code, type
 
-
+# 请求内容
 @g.app.route("/api/requests/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
     reqres.query_one(id)
     return json.dumps(reqres.__dict__)
 
+# 实时请求
 @g.app.route("/api/requests", methods=["GET"])
 def list():
     
@@ -161,7 +162,15 @@ def list():
             yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
     return Response(eventStream(), mimetype="text/event-stream")
 
+# 目录树
 @g.app.route("/api/tree", methods=["GET"])
-def dir_tree():
-    return json.dumps(g.dir_tree["children"])
+def dirTree():
+    return json.dumps(g.dirTree["children"])
     
+# 文件内容
+@g.app.route("/api/file/<uid>", methods=["GET"])
+def pathHash(uid):
+    path = g.pathHash[uid]
+    with open(path, 'r', encoding='UTF-8') as f:
+        data = f.read()
+    return Response(data, mimetype="text/plain")

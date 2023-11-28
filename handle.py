@@ -4,7 +4,7 @@ import json
 import time
 import g
 from watchdog.events import FileSystemEventHandler
-
+import uuid
 
 
 pattern_value = f"`(.+?)`"
@@ -214,7 +214,7 @@ class MyHandler(FileSystemEventHandler):
     # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
     # 通过另一个全局变量记录队列最后一位
     def on_created(self, event):
-        g.dir_tree = get_directory_tree("./api")
+        g.dirTree = get_directory_tree("./api")
         if not event.is_directory:
             if event.src_path != g.queue_end:
                 g.logger.info("检测到接口创建: %s", event.src_path)
@@ -229,10 +229,10 @@ class MyHandler(FileSystemEventHandler):
                 g.queue_end = event.src_path
 
     def on_moved(self, event):
-        g.dir_tree = get_directory_tree("./api")
+        g.dirTree = get_directory_tree("./api")
     
     def on_deleted(self, event):
-        g.dir_tree = get_directory_tree("./api")
+        g.dirTree = get_directory_tree("./api")
 
 # 生成目录树
 def get_directory_tree(root_path):
@@ -242,8 +242,10 @@ def get_directory_tree(root_path):
     # Get the name of the current directory
     name = os.path.basename(root_path)
 
+    uid = str(uuid.uuid1()).replace("-", "")
+    g.pathHash[uid] = root_path
     # Create a dictionary to store the directory tree
-    directory_tree = {'title': name, 'key': root_path, "type": "dir"}
+    directory_tree = {'title': name, 'key': uid, "type": "dir"}
 
     # Get the list of all items in the directory
     items = os.listdir(root_path)
@@ -262,7 +264,9 @@ def get_directory_tree(root_path):
         # If the item is a file, add the file name to the list of items
         else:
             if item.endswith('.md'):
-                directory_items.append({'title': item, 'key': item_path, "type": "file"})
+                uid = str(uuid.uuid1()).replace("-", "")
+                g.pathHash[uid] = item_path
+                directory_items.append({'title': item, 'key': uid, "type": "file"})
 
     # Add the list of items to the directory tree dictionary
     directory_tree['children'] = directory_items
