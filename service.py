@@ -178,8 +178,9 @@ def fileContent(uid):
 # 写入文件
 @g.app.route("/api/files/write", methods=["POST"])
 def fileWrite():
-    path = request.values.get("path")
-    fileContent = request.values.get("file")
+    data = request.get_json()
+    path = data.get("path")
+    fileContent = data.get("file")
 
     path = g.pathHash[path]
     with open(path, 'w', encoding='UTF-8') as f:
