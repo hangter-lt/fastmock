@@ -169,8 +169,21 @@ def dirTree():
     
 # 文件内容
 @g.app.route("/api/file/<uid>", methods=["GET"])
-def pathHash(uid):
+def fileContent(uid):
     path = g.pathHash[uid]
     with open(path, 'r', encoding='UTF-8') as f:
         data = f.read()
     return Response(data, mimetype="text/plain")
+
+# 写入文件
+@g.app.route("/api/files/write", methods=["POST"])
+def fileWrite():
+    path = request.values.get("path")
+    fileContent = request.values.get("file")
+
+    path = g.pathHash[path]
+    with open(path, 'w', encoding='UTF-8') as f:
+        f.write(fileContent)
+    
+    return "success"
+
