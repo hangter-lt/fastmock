@@ -1,4 +1,4 @@
-from flask import request, abort, Response
+from flask import request, abort, Response, render_template
 import random
 import xmltodict
 import g
@@ -144,10 +144,11 @@ def info(id):
 # 实时请求
 @g.app.route("/api/requests", methods=["GET"])
 def list():
-    
+
     def eventStream():
         i = 0
         while True:
+            # TODO:优化,自动关闭无用连接
             if i >= len(g.list_reqres):
                 time.sleep(1)
                 continue
@@ -187,4 +188,14 @@ def fileWrite():
         f.write(fileContent)
     
     return "success"
+
+@g.app.route("/")
+def index():
+    # return render_template("index.html")
+    return g.app.send_static_file('index.html')
+
+
+@g.app.route("/assets/<path>")
+def static1(path):
+    return g.app.send_static_file("assets/"+ path)
 

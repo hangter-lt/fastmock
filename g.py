@@ -33,7 +33,7 @@ fh.setFormatter(logging.Formatter(
 flt = logging.Filter("api")
 
 # app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist')
 app.debug = False
 app.logger.setLevel(logging.DEBUG)
 app.logger.removeHandler (default_handler)
