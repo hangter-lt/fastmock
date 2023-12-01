@@ -3,6 +3,9 @@ import logging
 from flask import Flask
 from flask.logging import default_handler 
 
+# 存放申请释放eventsource连接的jihe
+close_sets = set()
+
 # 全局列表,存储请求响应内容reqres
 list_reqres = []
 

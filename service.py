@@ -144,11 +144,16 @@ def info(id):
 # 实时请求
 @g.app.route("/api/requests", methods=["GET"])
 def list():
+    linkId = request.args.get("link_id")
 
-    def eventStream():
+    def eventStream(linkId):
         i = 0
         while True:
-            # TODO:优化,自动关闭无用连接
+            # 关闭连接
+            if linkId in g.close_sets:
+                g.close_sets.remove(linkId)
+                break
+
             if i >= len(g.list_reqres):
                 time.sleep(1)
                 continue
@@ -161,7 +166,7 @@ def list():
             i += 1
             # 符合前端接受规范流传递
             yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
-    return Response(eventStream(), mimetype="text/event-stream")
+    return Response(eventStream(linkId), mimetype="text/event-stream")
 
 # 目录树
 @g.app.route("/api/tree", methods=["GET"])
@@ -189,13 +194,20 @@ def fileWrite():
     
     return "success"
 
+# 首页
 @g.app.route("/")
 def index():
     # return render_template("index.html")
     return g.app.send_static_file('index.html')
 
-
+# 静态资源
 @g.app.route("/assets/<path>")
 def static1(path):
     return g.app.send_static_file("assets/"+ path)
 
+# 请求关闭连接
+@g.app.route("/api/close", methods=["GET"])
+def closeEvent():
+    linkId = request.args.get("link_id")
+    g.close_sets.add(linkId)
+    return "success"
