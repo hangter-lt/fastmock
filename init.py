@@ -1,7 +1,7 @@
 import g
 import sqlite3
 
-def init_DB():
+def initDB():
     
     conn = sqlite3.connect('mock.db')
     cursor = conn.cursor()

@@ -29,7 +29,7 @@ def api(path):
             reqres.reason = "路由未匹配成功"
             reqres.code = 404
             reqres.insert()
-            g.list_reqres.append(reqres)
+            g.listReqres.append(reqres)
             abort(404)
 
     # 校验请求方法
@@ -38,7 +38,7 @@ def api(path):
         reqres.reason = "请求方法未匹配成功"
         reqres.code = 404
         reqres.insert()
-        g.list_reqres.append(reqres)
+        g.listReqres.append(reqres)
         abort(404)
 
     # 获取请求内容
@@ -46,8 +46,8 @@ def api(path):
     params = dict(request.args)
     g.logger.info("请求头: %s\n", headers)
     
-    content_type = request.headers.get("Content-Type")
-    match content_type:
+    contentType = request.headers.get("Content-Type")
+    match contentType:
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -108,7 +108,7 @@ def api(path):
         reqres.reason = "未匹配到内容"
         reqres.code = 200
         reqres.insert()
-        g.list_reqres.append(reqres)
+        g.listReqres.append(reqres)
         return "", 200, {}       
         
     result = results[random.randint(0,len(results)-1)]
@@ -118,8 +118,8 @@ def api(path):
         code = result.code
 
     type = {}
-    if result.content_type != "":
-        type = {"Content-Type": result.content_type}
+    if result.contentType != "":
+        type = {"Content-Type": result.contentType}
     
 
     g.logger.info("响应码: %s", code)
@@ -127,37 +127,39 @@ def api(path):
     g.logger.info("响应内容: %s\n", result.content)
 
     reqres.code = code
-    reqres.content_type = result.content_type
+    reqres.contentType = result.contentType
     reqres.content = result.content
     reqres.result = "success"
     reqres.insert()
-    g.list_reqres.append(reqres)
+    g.listReqres.append(reqres)
     return result.content, code, type
 
 # 请求内容
 @g.app.route("/api/requests/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
-    reqres.query_one(id)
+    reqres.queryOne(id)
     return json.dumps(reqres.__dict__)
 
 # 实时请求
 @g.app.route("/api/requests", methods=["GET"])
 def list():
     linkId = request.args.get("link_id")
+    if linkId is None:
+        return abort(400)
 
     def eventStream(linkId):
         i = 0
         while True:
             # 关闭连接
-            if linkId in g.close_sets:
-                g.close_sets.remove(linkId)
+            if linkId in g.closeSets:
+                g.closeSets.remove(linkId)
                 break
 
-            if i >= len(g.list_reqres):
+            if i >= len(g.listReqres):
                 time.sleep(1)
                 continue
-            reqres = g.list_reqres[i]
+            reqres = g.listReqres[i]
             res = {
                 "id": reqres.id,
                 "uri": reqres.uri,
@@ -209,5 +211,5 @@ def static1(path):
 @g.app.route("/api/close", methods=["GET"])
 def closeEvent():
     linkId = request.args.get("link_id")
-    g.close_sets.add(linkId)
-    return "success"
+    g.closeSets.add(linkId)
+    return "success close"

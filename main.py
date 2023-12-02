@@ -8,7 +8,7 @@ from watchdog.observers import Observer
 if __name__ == "__main__":
     path = "./api"
 
-    init.init_DB()
+    init.initDB()
 
     g.logger.info("解析接口文件开始")
     for filename in handle.findAllFile(path):
@@ -19,12 +19,12 @@ if __name__ == "__main__":
     g.logger.info("解析接口文件完成")
 
     # 生成api配置文件目录树
-    g.dirTree = handle.get_directory_tree("./api")
+    g.dirTree = handle.getDirTree("./api")
 
     # 监视配置文件增删改
-    event_handler = handle.MyHandler()
+    eventHandler = handle.MyHandler()
     observer = Observer()
-    observer.schedule(event_handler, path, recursive=True)
+    observer.schedule(eventHandler, path, recursive=True)
     observer.start()
 
     # 启动一个线程处理队列
