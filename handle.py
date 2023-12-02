@@ -47,7 +47,7 @@ def parsefile(lines):
     a = Api()
     for i in range(len(lines)):
         # match uri
-        if lines[i].startswith("* uri"):
+        if lines[i].startswith("* uri") or lines[i].startswith("+ uri") or lines[i].startswith("- uri"):
             res = re.findall(patternValue, lines[i])
             if len(res) == 0:
                 while i<len(lines):
@@ -61,7 +61,7 @@ def parsefile(lines):
                 a.uri = res[0]
 
         # match method
-        if lines[i].startswith("* method"):
+        if lines[i].startswith("* method") or lines[i].startswith("+ method") or lines[i].startswith("- method"):
             res = re.findall(patternValue, lines[i])
             if len(res) == 0:
                 while i<len(lines):
@@ -82,7 +82,7 @@ def parsefile(lines):
             response = data.response
             while i<len(lines):
                 # match req route
-                if lines[i].startswith("+ route"):
+                if lines[i].startswith("+ route") or lines[i].startswith("- route") or lines[i].startswith("* route"):
                     res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
@@ -96,7 +96,7 @@ def parsefile(lines):
                         request.route = res[0] 
 
                 # match req method
-                if lines[i].startswith("+ method"):
+                if lines[i].startswith("+ method") or lines[i].startswith("- method") or lines[i].startswith("* method"):
                     res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
@@ -110,7 +110,7 @@ def parsefile(lines):
                         request.method = res[0] 
     
                 # match req headers
-                if lines[i].startswith("+ headers"):
+                if lines[i].startswith("+ headers") or lines[i].startswith("- headers") or lines[i].startswith("* headers"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -127,7 +127,7 @@ def parsefile(lines):
                             request.headers = con
 
                 # match req params
-                if lines[i].startswith("+ params"):
+                if lines[i].startswith("+ params") or lines[i].startswith("- params") or lines[i].startswith("* params"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -144,7 +144,7 @@ def parsefile(lines):
                             request.params = con
 
                 # match res code
-                if lines[i].startswith("- code"):
+                if lines[i].startswith("- code") or lines[i].startswith("+ code") or lines[i].startswith("* code"):
                     res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
@@ -158,7 +158,7 @@ def parsefile(lines):
                         response.code = int(res[0]) 
  
                 # match res content-type
-                if lines[i].startswith("- content-type"):  
+                if lines[i].startswith("- content-type") or lines[i].startswith("+ content-type") or lines[i].startswith("* content-type"):
                     res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
@@ -172,7 +172,7 @@ def parsefile(lines):
                         response.contentType = res[0] 
  
                 # match res data
-                if lines[i].startswith("- content") and not lines[i].startswith("- content-"):
+                if (lines[i].startswith("- content") or lines[i].startswith("+ content") or lines[i].startswith("* content")) and not lines[i].startswith("- content-"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
