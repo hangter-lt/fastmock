@@ -207,9 +207,9 @@ def index():
     return g.app.send_static_file('index.html')
 
 # 静态资源
-@g.app.route("/assets/<path>")
-def static1(path):
-    return g.app.send_static_file("assets/"+ path)
+@g.app.route("/" + consts.ROUTEPRE + "/<path>")
+def assets(path):
+    return g.app.send_static_file(consts.ROUTEPRE + "/" + path)
 
 # 请求关闭连接
 @g.app.route("/" + consts.ROUTEPRE + "/requests/close", methods=["GET"])
