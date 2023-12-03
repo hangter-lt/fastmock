@@ -2,6 +2,9 @@
 
 ## 使用说明
 在api目录下存放要mock的数据文件, md格式, 默认端口5000, 支持配置文件热更新
+### webUI
+仓库地址: [faskmock-web](https://github.com/hangter-lt/fastmock-web)
+已集成前端资源文件到此仓库dist目录下
 ### 启动程序
 `pip install --no-index --find-links=libs -r requirements.txt`  
 `python main.py`
@@ -56,8 +59,6 @@
 
 # TODO:
 增加日志  
-集成sqlite数据库  
-UI
 支持配置文件,自定义端口等  
 支持动态参数  
 ...
