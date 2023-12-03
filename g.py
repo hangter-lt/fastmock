@@ -1,7 +1,7 @@
 import queue
 import logging
 from flask import Flask
-from flask.logging import default_handler 
+from flask.logging import default_handler
 
 # 存放申请释放eventsource连接的jihe
 closeSets = set()
@@ -24,22 +24,22 @@ content = {}
 
 # 日志配置
 sh = logging.StreamHandler()
-sh.setFormatter(logging.Formatter(
-    fmt="%(asctime)s - %(levelname)4s - %(message)s",
-    datefmt="%X"
-    ))
-fh = logging.FileHandler(filename="api.log",mode='w')
-fh.setFormatter(logging.Formatter(
-    fmt="%(asctime)s - %(levelname)4s - %(message)s",
-    datefmt="%Y/%m/%d %X"
-    ))
+sh.setFormatter(
+    logging.Formatter(fmt="%(asctime)s - %(levelname)4s - %(message)s", datefmt="%X")
+)
+fh = logging.FileHandler(filename="api.log", mode="w")
+fh.setFormatter(
+    logging.Formatter(
+        fmt="%(asctime)s - %(levelname)4s - %(message)s", datefmt="%Y/%m/%d %X"
+    )
+)
 flt = logging.Filter("api")
 
 # app
-app = Flask(__name__, static_folder='dist')
+app = Flask(__name__, static_folder="dist")
 app.debug = False
 app.logger.setLevel(logging.DEBUG)
-app.logger.removeHandler (default_handler)
+app.logger.removeHandler(default_handler)
 app.logger.addHandler(sh)
 app.logger.addHandler(fh)
 app.logger.name = "api"

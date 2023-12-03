@@ -1,16 +1,16 @@
-import g
 import sqlite3
 
+
 def initDB():
-    
-    conn = sqlite3.connect('mock.db')
+    conn = sqlite3.connect("mock.db")
     cursor = conn.cursor()
 
     # 清空数据表
     cursor.execute("DROP TABLE IF EXISTS REQRES;")
 
     # 创建请求响应表
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE "reqres" (
             "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             "uri" text,
@@ -24,6 +24,7 @@ def initDB():
             "reason" TEXT,
             "time" INTEGER                  
         ); 
-    ''')
+    """
+    )
     conn.commit()
     conn.close()
