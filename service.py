@@ -5,12 +5,16 @@ import g
 import db
 import json
 import time
+import consts
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
 
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
+    if consts.ROUTEPRE in path:
+        abort(404)
+
     reqres = db.TableReqRes()
     reqres.uri = "/" + path
     reqres.method = request.method
@@ -135,14 +139,14 @@ def api(path):
     return result.content, code, type
 
 # 请求内容
-@g.app.route("/api/requests/<id>", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/request/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
     reqres.queryOne(id)
     return json.dumps(reqres.__dict__)
 
 # 实时请求
-@g.app.route("/api/requests", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/requests", methods=["GET"])
 def list():
     linkId = request.args.get("link_id")
     if linkId is None:
@@ -171,12 +175,12 @@ def list():
     return Response(eventStream(linkId), mimetype="text/event-stream")
 
 # 目录树
-@g.app.route("/api/tree", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/tree", methods=["GET"])
 def dirTree():
     return json.dumps(g.dirTree["children"])
     
 # 文件内容
-@g.app.route("/api/file/<uid>", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/file/<uid>", methods=["GET"])
 def fileContent(uid):
     path = g.pathHash[uid]
     with open(path, 'r', encoding='UTF-8') as f:
@@ -184,7 +188,7 @@ def fileContent(uid):
     return Response(data, mimetype="text/plain")
 
 # 写入文件
-@g.app.route("/api/files/write", methods=["POST"])
+@g.app.route("/" + consts.ROUTEPRE + "/files/write", methods=["POST"])
 def fileWrite():
     data = request.get_json()
     path = data.get("path")
@@ -208,7 +212,7 @@ def static1(path):
     return g.app.send_static_file("assets/"+ path)
 
 # 请求关闭连接
-@g.app.route("/api/close", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/requests/close", methods=["GET"])
 def closeEvent():
     linkId = request.args.get("link_id")
     g.closeSets.add(linkId)
