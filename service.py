@@ -1,16 +1,20 @@
-from flask import request, abort, Response
+from flask import request, abort, Response, render_template
 import random
 import xmltodict
 import g
 import db
 import json
 import time
+import consts
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
 
 @g.app.route("/<path:path>", methods=methods)
 def api(path):
+    if consts.ROUTEPRE in path:
+        abort(404)
+
     reqres = db.TableReqRes()
     reqres.uri = "/" + path
     reqres.method = request.method
@@ -29,7 +33,7 @@ def api(path):
             reqres.reason = "路由未匹配成功"
             reqres.code = 404
             reqres.insert()
-            g.list_reqres.append(reqres)
+            g.listReqres.append(reqres)
             abort(404)
 
     # 校验请求方法
@@ -38,7 +42,7 @@ def api(path):
         reqres.reason = "请求方法未匹配成功"
         reqres.code = 404
         reqres.insert()
-        g.list_reqres.append(reqres)
+        g.listReqres.append(reqres)
         abort(404)
 
     # 获取请求内容
@@ -46,8 +50,8 @@ def api(path):
     params = dict(request.args)
     g.logger.info("请求头: %s\n", headers)
     
-    content_type = request.headers.get("Content-Type")
-    match content_type:
+    contentType = request.headers.get("Content-Type")
+    match contentType:
         case "multipart/form-data":
             params.update(dict(request.form))
         case "application/x-www-form-urlencoded":
@@ -108,7 +112,7 @@ def api(path):
         reqres.reason = "未匹配到内容"
         reqres.code = 200
         reqres.insert()
-        g.list_reqres.append(reqres)
+        g.listReqres.append(reqres)
         return "", 200, {}       
         
     result = results[random.randint(0,len(results)-1)]
@@ -118,8 +122,8 @@ def api(path):
         code = result.code
 
     type = {}
-    if result.content_type != "":
-        type = {"Content-Type": result.content_type}
+    if result.contentType != "":
+        type = {"Content-Type": result.contentType}
     
 
     g.logger.info("响应码: %s", code)
@@ -127,31 +131,39 @@ def api(path):
     g.logger.info("响应内容: %s\n", result.content)
 
     reqres.code = code
-    reqres.content_type = result.content_type
+    reqres.contentType = result.contentType
     reqres.content = result.content
     reqres.result = "success"
     reqres.insert()
-    g.list_reqres.append(reqres)
+    g.listReqres.append(reqres)
     return result.content, code, type
 
 # 请求内容
-@g.app.route("/api/requests/<id>", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/request/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
-    reqres.query_one(id)
+    reqres.queryOne(id)
     return json.dumps(reqres.__dict__)
 
 # 实时请求
-@g.app.route("/api/requests", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/requests", methods=["GET"])
 def list():
-    
-    def eventStream():
+    linkId = request.args.get("link_id")
+    if linkId is None:
+        return abort(400)
+
+    def eventStream(linkId):
         i = 0
         while True:
-            if i >= len(g.list_reqres):
+            # 关闭连接
+            if linkId in g.closeSets:
+                g.closeSets.remove(linkId)
+                break
+
+            if i >= len(g.listReqres):
                 time.sleep(1)
                 continue
-            reqres = g.list_reqres[i]
+            reqres = g.listReqres[i]
             res = {
                 "id": reqres.id,
                 "uri": reqres.uri,
@@ -160,17 +172,48 @@ def list():
             i += 1
             # 符合前端接受规范流传递
             yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
-    return Response(eventStream(), mimetype="text/event-stream")
+    return Response(eventStream(linkId), mimetype="text/event-stream")
 
 # 目录树
-@g.app.route("/api/tree", methods=["GET"])
+@g.app.route("/" + consts.ROUTEPRE + "/tree", methods=["GET"])
 def dirTree():
     return json.dumps(g.dirTree["children"])
     
 # 文件内容
-@g.app.route("/api/file/<uid>", methods=["GET"])
-def pathHash(uid):
+@g.app.route("/" + consts.ROUTEPRE + "/file/<uid>", methods=["GET"])
+def fileContent(uid):
     path = g.pathHash[uid]
     with open(path, 'r', encoding='UTF-8') as f:
         data = f.read()
     return Response(data, mimetype="text/plain")
+
+# 写入文件
+@g.app.route("/" + consts.ROUTEPRE + "/files/write", methods=["POST"])
+def fileWrite():
+    data = request.get_json()
+    path = data.get("path")
+    fileContent = data.get("file")
+
+    path = g.pathHash[path]
+    with open(path, 'w', encoding='UTF-8') as f:
+        f.write(fileContent)
+    
+    return "success"
+
+# 首页
+@g.app.route("/")
+def index():
+    # return render_template("index.html")
+    return g.app.send_static_file('index.html')
+
+# 静态资源
+@g.app.route("/" + consts.ROUTEPRE + "/<path>")
+def assets(path):
+    return g.app.send_static_file(consts.ROUTEPRE + "/" + path)
+
+# 请求关闭连接
+@g.app.route("/" + consts.ROUTEPRE + "/requests/close", methods=["GET"])
+def closeEvent():
+    linkId = request.args.get("link_id")
+    g.closeSets.add(linkId)
+    return "success close"

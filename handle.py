@@ -7,8 +7,8 @@ from watchdog.events import FileSystemEventHandler
 import uuid
 
 
-pattern_value = f"`(.+?)`"
-pattern_json_comma = r"""(?<=[}\]"'])\s*,\s*(?!\s*[{["'])"""
+patternValue = f"`(.+?)`"
+patternJson = r"""(?<=[}\]"'])\s*,\s*(?!\s*[{["'])"""
 
 def findAllFile(base):
     for root, ds, fs in os.walk(base):
@@ -39,7 +39,7 @@ class Api():
         class Response():
             def __init__(self) -> None:
                 self.code = 0
-                self.content_type = ""
+                self.contentType = ""
                 self.content = ""
 
 # 解析文件内容
@@ -47,11 +47,11 @@ def parsefile(lines):
     a = Api()
     for i in range(len(lines)):
         # match uri
-        if lines[i].startswith("* uri"):
-            res = re.findall(pattern_value, lines[i])
+        if lines[i].startswith("* uri") or lines[i].startswith("+ uri") or lines[i].startswith("- uri"):
+            res = re.findall(patternValue, lines[i])
             if len(res) == 0:
                 while i<len(lines):
-                    res = re.findall(pattern_value, lines[i])
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         i += 1
                     else:
@@ -61,11 +61,11 @@ def parsefile(lines):
                 a.uri = res[0]
 
         # match method
-        if lines[i].startswith("* method"):
-            res = re.findall(pattern_value, lines[i])
+        if lines[i].startswith("* method") or lines[i].startswith("+ method") or lines[i].startswith("- method"):
+            res = re.findall(patternValue, lines[i])
             if len(res) == 0:
                 while i<len(lines):
-                    res = re.findall(pattern_value, lines[i])
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         i += 1
                     else:
@@ -82,11 +82,11 @@ def parsefile(lines):
             response = data.response
             while i<len(lines):
                 # match req route
-                if lines[i].startswith("+ route"):
-                    res = re.findall(pattern_value, lines[i])
+                if lines[i].startswith("+ route") or lines[i].startswith("- route") or lines[i].startswith("* route"):
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
-                            res = re.findall(pattern_value, lines[i])
+                            res = re.findall(patternValue, lines[i])
                             if len(res) == 0:
                                 i += 1
                             else:
@@ -96,11 +96,11 @@ def parsefile(lines):
                         request.route = res[0] 
 
                 # match req method
-                if lines[i].startswith("+ method"):
-                    res = re.findall(pattern_value, lines[i])
+                if lines[i].startswith("+ method") or lines[i].startswith("- method") or lines[i].startswith("* method"):
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
-                            res = re.findall(pattern_value, lines[i])
+                            res = re.findall(patternValue, lines[i])
                             if len(res) == 0:
                                 i += 1
                             else:
@@ -110,7 +110,7 @@ def parsefile(lines):
                         request.method = res[0] 
     
                 # match req headers
-                if lines[i].startswith("+ headers"):
+                if lines[i].startswith("+ headers") or lines[i].startswith("- headers") or lines[i].startswith("* headers"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -122,12 +122,12 @@ def parsefile(lines):
                             con += lines[i]
                             i += 1
                         if len(con) != "":
-                            con = re.sub(pattern_json_comma, "", con, 0)
+                            con = re.sub(patternJson, "", con, 0)
                             con = json.loads(con, strict=False)
                             request.headers = con
 
                 # match req params
-                if lines[i].startswith("+ params"):
+                if lines[i].startswith("+ params") or lines[i].startswith("- params") or lines[i].startswith("* params"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -139,16 +139,16 @@ def parsefile(lines):
                             con += lines[i]
                             i += 1
                         if len(con) != "":
-                            con = re.sub(pattern_json_comma, "", con, 0)
+                            con = re.sub(patternJson, "", con, 0)
                             con = json.loads(con, strict=False)
                             request.params = con
 
                 # match res code
-                if lines[i].startswith("- code"):
-                    res = re.findall(pattern_value, lines[i])
+                if lines[i].startswith("- code") or lines[i].startswith("+ code") or lines[i].startswith("* code"):
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
-                            res = re.findall(pattern_value, lines[i])
+                            res = re.findall(patternValue, lines[i])
                             if len(res) == 0:
                                 i += 1
                             else:
@@ -158,21 +158,21 @@ def parsefile(lines):
                         response.code = int(res[0]) 
  
                 # match res content-type
-                if lines[i].startswith("- content-type"):  
-                    res = re.findall(pattern_value, lines[i])
+                if lines[i].startswith("- content-type") or lines[i].startswith("+ content-type") or lines[i].startswith("* content-type"):
+                    res = re.findall(patternValue, lines[i])
                     if len(res) == 0:
                         while i<len(lines):
-                            res = re.findall(pattern_value, lines[i])
+                            res = re.findall(patternValue, lines[i])
                             if len(res) == 0:
                                 i += 1
                             else:
-                                response.content_type = res[0]
+                                response.contentType = res[0]
                                 break
                     else:
-                        response.content_type = res[0] 
+                        response.contentType = res[0] 
  
                 # match res data
-                if lines[i].startswith("- content") and not lines[i].startswith("- content-"):
+                if (lines[i].startswith("- content") or lines[i].startswith("+ content") or lines[i].startswith("* content")) and not lines[i].startswith("- content-"):
                     i += 1
                     if lines[i].startswith("```"):
                         i += 1
@@ -184,7 +184,7 @@ def parsefile(lines):
                             con += lines[i]
                             i += 1
                         if len(con) != "":
-                            con = re.sub(pattern_json_comma, "", con, 0)
+                            con = re.sub(patternJson, "", con, 0)
                             # con = json.loads(con, strict=False)
                             response.content = con
                 # match next
@@ -200,9 +200,9 @@ def parsefile(lines):
 def updatefile():
     while True:
         # 更新
-        if g.queue_files.empty():
-            g.queue_end = ""
-        filename = g.queue_files.get()
+        if g.queueFiles.empty():
+            g.queueEnd = ""
+        filename = g.queueFiles.get()
         with open(filename, 'r', encoding='UTF-8') as f:
             a = parsefile(f.readlines())
             g.content[a.uri] = a
@@ -214,62 +214,62 @@ class MyHandler(FileSystemEventHandler):
     # 监控文件变动, 文件path加入到队列, 加入时判断队列最后一位是不是当前路径
     # 通过另一个全局变量记录队列最后一位
     def on_created(self, event):
-        g.dirTree = get_directory_tree("./api")
+        g.dirTree = getDirTree("./api")
         if not event.is_directory:
-            if event.src_path != g.queue_end:
+            if event.src_path != g.queueEnd:
                 g.logger.info("检测到接口创建: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
+                g.queueFiles.put(event.src_path)
+                g.queueEnd = event.src_path
 
     def on_modified(self, event):
         if not event.is_directory:
-            if event.src_path != g.queue_end:
+            if event.src_path != g.queueEnd:
                 g.logger.info("检测到接口文件更新: %s", event.src_path)
-                g.queue_files.put(event.src_path)
-                g.queue_end = event.src_path
+                g.queueFiles.put(event.src_path)
+                g.queueEnd = event.src_path
 
     def on_moved(self, event):
-        g.dirTree = get_directory_tree("./api")
+        g.dirTree = getDirTree("./api")
     
     def on_deleted(self, event):
-        g.dirTree = get_directory_tree("./api")
+        g.dirTree = getDirTree("./api")
 
 # 生成目录树
-def get_directory_tree(root_path):
+def getDirTree(rootPath):
     """
     Return the directory tree for the given root path.
     """
     # Get the name of the current directory
-    name = os.path.basename(root_path)
+    name = os.path.basename(rootPath)
 
     uid = str(uuid.uuid1()).replace("-", "")
-    g.pathHash[uid] = root_path
+    g.pathHash[uid] = rootPath
     # Create a dictionary to store the directory tree
-    directory_tree = {'title': name, 'key': uid, "type": "dir"}
+    dirTree = {'title': name, 'key': uid, "type": "dir"}
 
     # Get the list of all items in the directory
-    items = os.listdir(root_path)
+    items = os.listdir(rootPath)
 
     # Create a list to store the items in the directory
-    directory_items = []
+    dirItems = []
 
     # Loop through the items
     for item in items:
         # Get the full path of the item
-        item_path = os.path.join(root_path, item)
+        itemPath = os.path.join(rootPath, item)
 
         # If the item is a directory, recursively get the directory tree
-        if os.path.isdir(item_path):
-            directory_items.append(get_directory_tree(item_path))
+        if os.path.isdir(itemPath):
+            dirItems.append(getDirTree(itemPath))
         # If the item is a file, add the file name to the list of items
         else:
             if item.endswith('.md'):
                 uid = str(uuid.uuid1()).replace("-", "")
-                g.pathHash[uid] = item_path
-                directory_items.append({'title': item, 'key': uid, "type": "file"})
+                g.pathHash[uid] = itemPath
+                dirItems.append({'title': item, 'key': uid, "type": "file"})
 
     # Add the list of items to the directory tree dictionary
-    directory_tree['children'] = directory_items
+    dirTree['children'] = dirItems
 
     # Return the directory tree
-    return directory_tree
+    return dirTree

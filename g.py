@@ -3,20 +3,23 @@ import logging
 from flask import Flask
 from flask.logging import default_handler 
 
+# 存放申请释放eventsource连接的jihe
+closeSets = set()
+
 # 全局列表,存储请求响应内容reqres
-list_reqres = []
+listReqres = []
 
 # api配置文件目录树
 dirTree = {}
 pathHash = {}
 
 # 全局队列,变动的文件
-queue_files = queue.SimpleQueue()
+queueFiles = queue.SimpleQueue()
 
 # 记录队列末尾值
-queue_end = ""
+queueEnd = ""
 
-# content
+# api内容
 content = {}
 
 # 日志配置
@@ -33,7 +36,7 @@ fh.setFormatter(logging.Formatter(
 flt = logging.Filter("api")
 
 # app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist')
 app.debug = False
 app.logger.setLevel(logging.DEBUG)
 app.logger.removeHandler (default_handler)

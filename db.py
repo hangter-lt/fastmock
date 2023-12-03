@@ -7,7 +7,7 @@ class TableReqRes():
     header = ""
     params = ""
     code = 0
-    content_type = ""
+    contentType = ""
     content = ""
     result = ""
     reason = ""
@@ -28,7 +28,7 @@ class TableReqRes():
                 str(self.header),
                 str(self.params),
                 self.code,
-                self.content_type,
+                self.contentType,
                 str(self.content),
                 self.result,
                 self.reason,
@@ -41,7 +41,7 @@ class TableReqRes():
         self.id = cursor.lastrowid
 
     
-    def query_one(self, id):
+    def queryOne(self, id):
         self.id = id
         conn = sqlite3.connect("mock.db")
         cursor = conn.cursor()
@@ -61,7 +61,7 @@ class TableReqRes():
             self.header = data[2] 
             self.params = data[3] 
             self.code = data[4] 
-            self.content_type = data[5] 
+            self.contentType = data[5] 
             self.content = data[6] 
             self.result = data[7] 
             self.reason = data[8] 
