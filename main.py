@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     g.logger.info("解析接口文件开始")
     for filename in handle.findAllFile(path):
-        with open(filename, 'r', encoding='UTF-8') as f:
+        with open(filename, "r", encoding="UTF-8") as f:
             a = handle.parsefile(f.readlines())
             g.content[a.uri] = a
             g.logger.info("api: %s", a.uri)
@@ -33,4 +33,3 @@ if __name__ == "__main__":
 
     g.logger.info("mock接口启动")
     g.app.run()
-

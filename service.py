@@ -29,7 +29,7 @@ def api(path):
         uri = "/".join(uri.split("/")[:-1] + [":"])
         a = g.content.get(uri)
         if not a:
-            g.logger.warn("路由: %s未匹配成功", '/' + path)
+            g.logger.warn("路由: %s未匹配成功", "/" + path)
             reqres.reason = "路由未匹配成功"
             reqres.code = 404
             reqres.insert()
@@ -49,7 +49,7 @@ def api(path):
     headers = dict(request.headers)
     params = dict(request.args)
     g.logger.info("请求头: %s\n", headers)
-    
+
     contentType = request.headers.get("Content-Type")
     match contentType:
         case "multipart/form-data":
@@ -74,7 +74,7 @@ def api(path):
                     pass
                 # xml格式
                 try:
-                    data =  request.get_data()
+                    data = request.get_data()
                     data = xmltodict.parse(data)
                 except:
                     pass
@@ -95,8 +95,8 @@ def api(path):
         # 校验组内method
         if data.request.method != "":
             if request.method not in data.request.method:
-                continue    
-        
+                continue
+
         # 校验headers
         if not data.request.headers.items() <= headers.items():
             continue
@@ -105,18 +105,17 @@ def api(path):
         if data.request.params.items() <= params.items():
             results.append(data.response)
 
-
     # 响应内容
     if len(results) == 0:
-        g.logger.warn("路由: %s未匹配到内容",uri)
+        g.logger.warn("路由: %s未匹配到内容", uri)
         reqres.reason = "未匹配到内容"
         reqres.code = 200
         reqres.insert()
         g.listReqres.append(reqres)
-        return "", 200, {}       
-        
-    result = results[random.randint(0,len(results)-1)]
-    
+        return "", 200, {}
+
+    result = results[random.randint(0, len(results) - 1)]
+
     code = 200
     if result.code != 0:
         code = result.code
@@ -124,7 +123,6 @@ def api(path):
     type = {}
     if result.contentType != "":
         type = {"Content-Type": result.contentType}
-    
 
     g.logger.info("响应码: %s", code)
     g.logger.info("响应类型: %s", type)
@@ -138,12 +136,14 @@ def api(path):
     g.listReqres.append(reqres)
     return result.content, code, type
 
+
 # 请求内容
 @g.app.route("/" + consts.ROUTEPRE + "/request/<id>", methods=["GET"])
 def info(id):
     reqres = db.TableReqRes()
     reqres.queryOne(id)
     return json.dumps(reqres.__dict__)
+
 
 # 实时请求
 @g.app.route("/" + consts.ROUTEPRE + "/requests", methods=["GET"])
@@ -171,21 +171,27 @@ def list():
             }
             i += 1
             # 符合前端接受规范流传递
-            yield "id: " + str(reqres.id) + "event: message\ndata: " + str(json.dumps(res)) + "\n\n" 
+            yield "id: " + str(reqres.id) + "event: message\ndata: " + str(
+                json.dumps(res)
+            ) + "\n\n"
+
     return Response(eventStream(linkId), mimetype="text/event-stream")
+
 
 # 目录树
 @g.app.route("/" + consts.ROUTEPRE + "/tree", methods=["GET"])
 def dirTree():
     return json.dumps(g.dirTree["children"])
-    
+
+
 # 文件内容
 @g.app.route("/" + consts.ROUTEPRE + "/file/<uid>", methods=["GET"])
 def fileContent(uid):
     path = g.pathHash[uid]
-    with open(path, 'r', encoding='UTF-8') as f:
+    with open(path, "r", encoding="UTF-8") as f:
         data = f.read()
     return Response(data, mimetype="text/plain")
+
 
 # 写入文件
 @g.app.route("/" + consts.ROUTEPRE + "/files/write", methods=["POST"])
@@ -195,21 +201,24 @@ def fileWrite():
     fileContent = data.get("file")
 
     path = g.pathHash[path]
-    with open(path, 'w', encoding='UTF-8') as f:
+    with open(path, "w", encoding="UTF-8") as f:
         f.write(fileContent)
-    
+
     return "success"
+
 
 # 首页
 @g.app.route("/")
 def index():
     # return render_template("index.html")
-    return g.app.send_static_file('index.html')
+    return g.app.send_static_file("index.html")
+
 
 # 静态资源
 @g.app.route("/" + consts.ROUTEPRE + "/<path>")
 def assets(path):
     return g.app.send_static_file(consts.ROUTEPRE + "/" + path)
+
 
 # 请求关闭连接
 @g.app.route("/" + consts.ROUTEPRE + "/requests/close", methods=["GET"])
