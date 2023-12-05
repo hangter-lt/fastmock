@@ -1,4 +1,6 @@
 __pycache__/
 venv/
+api/*
+!api/example/
 api.log
 mock.db
