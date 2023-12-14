@@ -4,3 +4,6 @@ api/*
 !api/example/
 api.log
 mock.db
+nohup.out
+web/dist
+web/node_modules
