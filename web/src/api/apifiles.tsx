@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Tree, theme, Switch, Empty, Tag, Menu, Dropdown } from 'antd';
+import { Layout, Tree, theme, Switch, Empty, Tag, Dropdown } from 'antd';
 import type { DataNode } from 'antd/es/tree';
-
 import axios from 'axios';
 import { MdEditor, ToolbarNames } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
 import { API_TREE, API_FILE, API_FILES_WRITE } from '../consts';
+import type { ItemType } from 'antd/es/menu/hooks/useItems';
 
 
 const { Content, Sider } = Layout;
+
+interface MenuTitleInfo {
+    key: string;
+    domEvent: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>;
+}
 
 const ApiFiles: React.FC = () => {
     const {
@@ -38,7 +43,7 @@ const ApiFiles: React.FC = () => {
     const treeTitleAddDropdown = (childrens: DataNode[]) => {
         childrens.forEach((value: DataNode, index: number, array: DataNode[]) => {
             array[index].title = (
-                <Dropdown  trigger={['contextMenu']}>
+                <Dropdown menu={{ items }} trigger={['contextMenu']}>
                     <div className="f12 tree-title">{value.title?.toString()}</div>
                 </Dropdown>
             )
@@ -106,17 +111,18 @@ const ApiFiles: React.FC = () => {
         //     setSelectKeys([key]);
     }
 
-    const items: any = [
+    const onClick = ({key, domEvent}:MenuTitleInfo) => {
+        console.log(key)
+    }
+
+
+    const items: ItemType[] = [
         {
             label: "新建文件",
             key: "new",
+            onClick: onClick,
         }
     ]
-    const rightMenu = () => {
-        return (
-            <Menu items={items}></Menu>
-        )
-    }
 
     return (
         <Layout style={{ background: colorBgContainer, height: '100%', padding: '10px 0px' }}>
