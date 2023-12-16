@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Tree, theme, Switch, Empty, Tag, Dropdown } from 'antd';
+import { Layout, Tree, theme, Switch, Empty, Tag } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import axios from 'axios';
 import { MdEditor, ToolbarNames } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
 import { API_TREE, API_FILE, API_FILES_WRITE } from '../consts';
-import type { ItemType } from 'antd/es/menu/hooks/useItems';
 
 
 const { Content, Sider } = Layout;
-
-interface MenuTitleInfo {
-    key: string;
-    domEvent: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>;
-}
 
 const ApiFiles: React.FC = () => {
     const {
@@ -40,23 +34,9 @@ const ApiFiles: React.FC = () => {
         'catalog',
     ];
 
-    const treeTitleAddDropdown = (childrens: DataNode[]) => {
-        childrens.forEach((value: DataNode, index: number, array: DataNode[]) => {
-            array[index].title = (
-                <Dropdown menu={{ items }} trigger={['contextMenu']}>
-                    <div className="f12 tree-title">{value.title?.toString()}</div>
-                </Dropdown>
-            )
-            if (value.children) {
-                treeTitleAddDropdown(value.children)
-            }
-        })
-    }
-
     const getTree = () => {
         axios.get(API_TREE).then((res) => {
             let datas: DataNode[] = res.data
-            treeTitleAddDropdown(datas)
             console.log(datas)
             setTree(datas)
         })
@@ -96,34 +76,6 @@ const ApiFiles: React.FC = () => {
         getTree()
     }, []);
 
-    const treeRightClickHandle = (info: {
-        event: React.MouseEvent;
-        node: any;
-    }) => {
-        info.event.preventDefault();
-        console.log("123")
-        //     const {dataRef} = node || {};
-        //     const {itemType, operFlag, xrefStatus, key} = dataRef || {};
-        //     setItemType(isMode(itemType)); // 显示右键菜单类型判断
-        //     setNested(operFlag < 1 ? true : false); // 右键菜单项是否禁用标识
-        //     setIsDisabled(xrefStatus == 4 ? true : false); // 某些指定的右键菜单项是否禁用标识
-        //     setSelectTreeNode(dataRef);
-        //     setSelectKeys([key]);
-    }
-
-    const onClick = ({key, domEvent}:MenuTitleInfo) => {
-        console.log(key)
-    }
-
-
-    const items: ItemType[] = [
-        {
-            label: "新建文件",
-            key: "new",
-            onClick: onClick,
-        }
-    ]
-
     return (
         <Layout style={{ background: colorBgContainer, height: '100%', padding: '10px 0px' }}>
             <Sider style={{ background: colorBgContainer, overflow: 'auto' }} width={300}>
@@ -133,7 +85,6 @@ const ApiFiles: React.FC = () => {
                     showIcon={showIcon}
                     treeData={tree}
                     onSelect={select}
-                    onRightClick={({ event, node }) => treeRightClickHandle({ event, node })}
                 />
 
             </Sider>
