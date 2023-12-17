@@ -32,4 +32,4 @@ if __name__ == "__main__":
     t.start()
 
     g.logger.info("mock接口启动")
-    g.app.run()
+    g.app.run(host="0.0.0.0")

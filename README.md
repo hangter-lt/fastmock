@@ -34,7 +34,7 @@ params会匹配多种来源的请求参数(url参数,body参数,json参数,xml�
 匹配成功的组内响应内容会被响应, 若多组匹配成功, 则随机响应其中一组
 
 ## WebUI
-前端项目仓库: [fastmock-web](https://github.com/hangter-lt/fastmock-web) 已集成前端资源文件到此仓库dist目录下
+前端项目: `/web`, 前端编译后的资源文件已集成到`/dist`
 
 
 ### 实时请求响应预览
