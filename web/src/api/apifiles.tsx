@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Tree, theme, Switch, Empty, Tag } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout, Tree, theme, Switch, Empty, Tag, Button, Tooltip, Popconfirm, Modal, Form, Input } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import axios from 'axios';
 import { MdEditor, ToolbarNames } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
 import { API_TREE, API_FILE, API_FILES_WRITE } from '../consts';
-
+import { DeleteOutlined, FileAddOutlined, FolderAddOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Content, Sider } = Layout;
 
@@ -20,7 +20,19 @@ const ApiFiles: React.FC = () => {
 
     const [content, setContent] = useState("")
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createProModalOpen, setCreateProModalOpen] = useState(false);
+
     const [path, setPath] = useState("")
+
+    // 当前操作节点
+    const currentNode = useRef({ "key": "", "title": "" })
+
+    // 重命名表单
+    const [rename] = Form.useForm()
+    // 新建表单
+    const [create] = Form.useForm()
 
     const toolbars: ToolbarNames[] | undefined = [
         'save',
@@ -34,15 +46,74 @@ const ApiFiles: React.FC = () => {
         'catalog',
     ];
 
+
+    const setFileTitle = (title: any): any => {
+        return (
+            <span>
+                {title}
+                <Tooltip title="重命名">
+                    <Button type="text" icon={<EditOutlined />} onClick={showRenameModal} />
+                </Tooltip>
+                <Tooltip title="删除文件">
+                    <Popconfirm
+                        title="确认删除?"
+                        onConfirm={deleteConfirm}
+                        okText="是"
+                        cancelText="否"
+                    >
+                        <Button type="text" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </Tooltip>
+            </span>
+        )
+    }
+
+    const setFolderTitle = (title: any): any => {
+        return (
+            <span>{title}
+                <Tooltip title="新建">
+                    <Button type="text" icon={<FileAddOutlined />} onClick={showCreateModal} />
+                </Tooltip>
+                <Tooltip title="删除目录">
+                    <Popconfirm
+                        title="确认删除?"
+                        onConfirm={() => deleteConfirm()}
+                        okText="是"
+                        cancelText="否"
+                    >
+                        <Button type="text" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                </Tooltip>
+            </span>
+        )
+    }
+
+    const fillButton = (datas: any[]) => {
+        for (var i = 0; i < datas.length; i++) {
+            if (datas[i].type == "file") {
+                datas[i].title = setFileTitle(datas[i].title)
+            } else {
+                datas[i].title = setFolderTitle(datas[i].title)
+            }
+            if (datas[i].children != null) {
+                fillButton(datas[i].children)
+            }
+        }
+    }
+
     const getTree = () => {
         axios.get(API_TREE).then((res) => {
             let datas: DataNode[] = res.data
-            console.log(datas)
+
+            // 递归填充树节点按钮
+            fillButton(datas)
             setTree(datas)
         })
     }
 
+
     // @ts-ignore
+    // 选中树节点时
     const select = (selectedKeys: any, e: {
         event: 'select';
         selected: boolean;
@@ -50,6 +121,14 @@ const ApiFiles: React.FC = () => {
         selectedNodes: any;
         nativeEvent: MouseEvent;
     }) => {
+
+        currentNode.current = {
+            "key": e.node.key,
+            "title": e.node.title.props.children[0]
+        }
+        rename.setFieldValue("name", e.node.title.props.children[0])
+        // console.log(key)
+        // console.log(title)
         if (e.node.type == "file") {
             axios.get(API_FILE + e.node.key).then((res) => {
                 setContent(res.data)
@@ -76,11 +155,116 @@ const ApiFiles: React.FC = () => {
         getTree()
     }, []);
 
+
+    const showRenameModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleRenameCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    const renameFinish = (values: any) => {
+        console.log('Success:', values);
+        console.log(currentNode.current);
+    };
+
+    const showCreateModal = () => {
+        setCreateModalOpen(true)
+    }
+
+    const handleCreateCancel = () => {
+        setCreateModalOpen(false)
+    }
+
+    const createFinish = (values: any) => {
+        console.log(values)
+    }
+
+    const showCreateProModal = () => {
+        setCreateProModalOpen(true)
+    }
+
+    const handleCreateProCancel = () => {
+        setCreateProModalOpen(false)
+    }
+
+    const createProFinish = (values: any) => {
+        console.log(values)
+    }
+
+    const deleteConfirm = () => {
+        console.log(currentNode.current);
+    };
+
     return (
         <Layout style={{ background: colorBgContainer, height: '100%', padding: '10px 0px' }}>
+            <Modal title="重命名" open={isModalOpen} onCancel={handleRenameCancel} footer="">
+                <Form
+                    form={rename}
+                    name="rename"
+                    onFinish={renameFinish}
+                >
+                    <Form.Item
+                        name="name">
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item >
+                        <Button type="primary" htmlType="submit">
+                            确认
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal title="新建文件" open={createModalOpen} onCancel={handleCreateCancel} footer="">
+                <Form
+                    form={create}
+                    name="create"
+                    onFinish={createFinish}
+                >
+                    <Form.Item
+                        name="name">
+                        <Input placeholder='请输入文件名或目录名' />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="type">
+                        <Switch checkedChildren="新建目录" unCheckedChildren="新建文件" />
+                    </Form.Item>
+
+                    <Form.Item >
+                        <Button type="primary" htmlType="submit">
+                            确认
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal title="新建项目" open={createProModalOpen} onCancel={handleCreateProCancel} footer="">
+                <Form
+                    name="createPro"
+                    onFinish={createProFinish}
+                >
+                    <Form.Item
+                        name="name">
+                        <Input placeholder='请输入项目名称' />
+                    </Form.Item>
+
+                    <Form.Item >
+                        <Button type="primary" htmlType="submit">
+                            确认
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+
+
             <Sider style={{ background: colorBgContainer, overflow: 'auto' }} width={300}>
                 <Switch style={{ display: 'none' }} checked={showIcon} onChange={setShowIcon} />
-
+                <Button onClick={showCreateProModal}>新建项目</Button>
                 <Tree
                     showIcon={showIcon}
                     treeData={tree}
