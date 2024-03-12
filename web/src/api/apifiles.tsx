@@ -230,7 +230,7 @@ const ApiFiles: React.FC = () => {
                     </Form.Item>
 
                     <Form.Item
-                        name="type">
+                        name="is_dir">
                         <Switch checkedChildren="新建目录" unCheckedChildren="新建文件" />
                     </Form.Item>
 
