@@ -4,7 +4,7 @@ import type { DataNode } from 'antd/es/tree';
 import axios from 'axios';
 import { MdEditor, ToolbarNames } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
-import { API_TREE, API_FILE, API_FILES_WRITE } from '../consts';
+import { API_TREE, API_FILE, API_FILES_WRITE, API_FILES_ADD, API_FILES_RENAME, API_FILES_REMOVE } from '../consts';
 import { DeleteOutlined, FileAddOutlined, FolderAddOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Content, Sider } = Layout;
@@ -20,9 +20,10 @@ const ApiFiles: React.FC = () => {
 
     const [content, setContent] = useState("")
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [createProModalOpen, setCreateProModalOpen] = useState(false);
+    const [updateTree, setUpdateTree] = useState(false)
 
     const [path, setPath] = useState("")
 
@@ -73,6 +74,9 @@ const ApiFiles: React.FC = () => {
             <span>{title}
                 <Tooltip title="新建">
                     <Button type="text" icon={<FileAddOutlined />} onClick={showCreateModal} />
+                </Tooltip>
+                <Tooltip title="重命名">
+                    <Button type="text" icon={<EditOutlined />} onClick={showRenameModal} />
                 </Tooltip>
                 <Tooltip title="删除目录">
                     <Popconfirm
@@ -153,20 +157,26 @@ const ApiFiles: React.FC = () => {
 
     useEffect(() => {
         getTree()
-    }, []);
+    }, [updateTree]);
 
 
     const showRenameModal = () => {
-        setIsModalOpen(true);
+        setRenameModalOpen(true);
     };
 
     const handleRenameCancel = () => {
-        setIsModalOpen(false);
+        setRenameModalOpen(false);
     };
 
     const renameFinish = (values: any) => {
-        console.log('Success:', values);
-        console.log(currentNode.current);
+        axios.post(API_FILES_RENAME, {
+            "key": currentNode.current.key,
+            "name": values.name,
+        }).then((res) => {
+            console.log(res)
+            setUpdateTree(!updateTree)
+            setRenameModalOpen(false)
+        }) 
     };
 
     const showCreateModal = () => {
@@ -178,7 +188,15 @@ const ApiFiles: React.FC = () => {
     }
 
     const createFinish = (values: any) => {
-        console.log(values)
+        axios.post(API_FILES_ADD, {
+            "key": currentNode.current.key,
+            "name": values.name,
+            "is_dir": values.is_dir,
+        }).then((res) => {
+            console.log(res)
+            setUpdateTree(!updateTree)
+            setCreateModalOpen(false)
+        })
     }
 
     const showCreateProModal = () => {
@@ -191,15 +209,30 @@ const ApiFiles: React.FC = () => {
 
     const createProFinish = (values: any) => {
         console.log(values)
+        axios.post(API_FILES_ADD, {
+            "key": "",
+            "name": values.name,
+            "is_dir": true,
+        }).then((res) => {
+            console.log(res)
+            setUpdateTree(!updateTree)
+            setCreateProModalOpen(false)
+        }) 
     }
 
     const deleteConfirm = () => {
         console.log(currentNode.current);
+        axios.post(API_FILES_REMOVE, {
+            "key": currentNode.current.key,
+        }).then((res) => {
+            console.log(res)
+            setUpdateTree(!updateTree)
+        })
     };
 
     return (
         <Layout style={{ background: colorBgContainer, height: '100%', padding: '10px 0px' }}>
-            <Modal title="重命名" open={isModalOpen} onCancel={handleRenameCancel} footer="">
+            <Modal title="重命名" open={renameModalOpen} onCancel={handleRenameCancel} footer="">
                 <Form
                     form={rename}
                     name="rename"

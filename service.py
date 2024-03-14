@@ -7,6 +7,7 @@ import json
 import time
 import consts
 import os
+import shutil
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
@@ -236,13 +237,18 @@ def addFileFolder():
     is_dir = data.get("is_dir")
     key = data.get("key")
 
-    path = g.pathHash[key] + "/" + name
-    if is_dir:
+    if key == "":
+        path = "./api" + "/" + name
         if not os.path.exists(path):
             os.makedirs(path)
     else:
-        file = open(path, "w")
-        file.close()
+        path = g.pathHash[key] + "/" + name
+        if is_dir:
+            if not os.path.exists(path):
+                os.makedirs(path)
+        else:
+            file = open(path, "w")
+            file.close()
 
     return ""
 
@@ -256,7 +262,7 @@ def removeFileFolder():
     path = g.pathHash[key]
 
     if os.path.isdir(path):
-        os.removedirs(path)
+        shutil.rmtree(path) 
     else:
         os.remove(path)
     return ""
