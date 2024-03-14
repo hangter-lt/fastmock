@@ -5,7 +5,7 @@ import axios from 'axios';
 import { MdEditor, ToolbarNames } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';
 import { API_TREE, API_FILE, API_FILES_WRITE, API_FILES_ADD, API_FILES_RENAME, API_FILES_REMOVE } from '../consts';
-import { DeleteOutlined, FileAddOutlined, FolderAddOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FileAddOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Content, Sider } = Layout;
 
