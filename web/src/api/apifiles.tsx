@@ -53,7 +53,7 @@ const ApiFiles: React.FC = () => {
             <span>
                 {title}
                 <Tooltip title="重命名">
-                    <Button type="text" icon={<EditOutlined />} onClick={showRenameModal} />
+                    <Button size="small" type="text" icon={<EditOutlined />} onClick={showRenameModal} />
                 </Tooltip>
                 <Tooltip title="删除文件">
                     <Popconfirm
@@ -62,7 +62,7 @@ const ApiFiles: React.FC = () => {
                         okText="是"
                         cancelText="否"
                     >
-                        <Button type="text" icon={<DeleteOutlined />} />
+                        <Button size="small" type="text" icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </Tooltip>
             </span>
@@ -73,10 +73,10 @@ const ApiFiles: React.FC = () => {
         return (
             <span>{title}
                 <Tooltip title="新建">
-                    <Button type="text" icon={<FileAddOutlined />} onClick={showCreateModal} />
+                    <Button size="small" type="text" icon={<FileAddOutlined />} onClick={showCreateModal} />
                 </Tooltip>
                 <Tooltip title="重命名">
-                    <Button type="text" icon={<EditOutlined />} onClick={showRenameModal} />
+                    <Button size="small" type="text" icon={<EditOutlined />} onClick={showRenameModal} />
                 </Tooltip>
                 <Tooltip title="删除目录">
                     <Popconfirm
@@ -85,7 +85,7 @@ const ApiFiles: React.FC = () => {
                         okText="是"
                         cancelText="否"
                     >
-                        <Button type="text" icon={<DeleteOutlined />} />
+                        <Button size="small" type="text" icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </Tooltip>
             </span>
@@ -176,7 +176,7 @@ const ApiFiles: React.FC = () => {
             console.log(res)
             setUpdateTree(!updateTree)
             setRenameModalOpen(false)
-        }) 
+        })
     };
 
     const showCreateModal = () => {
@@ -217,7 +217,7 @@ const ApiFiles: React.FC = () => {
             console.log(res)
             setUpdateTree(!updateTree)
             setCreateProModalOpen(false)
-        }) 
+        })
     }
 
     const deleteConfirm = () => {
@@ -297,7 +297,7 @@ const ApiFiles: React.FC = () => {
 
             <Sider style={{ background: colorBgContainer, overflow: 'auto' }} width={300}>
                 <Switch style={{ display: 'none' }} checked={showIcon} onChange={setShowIcon} />
-                <Button onClick={showCreateProModal}>新建项目</Button>
+                <Button icon={<FileAddOutlined />} size="small" onClick={showCreateProModal}>新建项目</Button>
                 <Tree
                     showIcon={showIcon}
                     treeData={tree}
