@@ -317,7 +317,7 @@ const ApiFiles: React.FC = () => {
                         onSave={save}
                         onChange={change}
                     />
-                    <Tag color='red' bordered={false}>单机左上角按钮或输入Ctrl+S保存</Tag>
+                    <Tag color='red' bordered={false}>单击左上角按钮或输入Ctrl+S保存</Tag>
                 </Content>
             )}
         </Layout >
