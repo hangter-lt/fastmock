@@ -6,6 +6,8 @@ import db
 import json
 import time
 import consts
+import os
+import shutil
 
 methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"]
 
@@ -226,3 +228,56 @@ def closeEvent():
     linkId = request.args.get("link_id")
     g.closeSets.add(linkId)
     return "success close"
+
+# 增加配置文件或目录
+@g.app.route("/" + consts.ROUTEPRE + "/files/add", methods=["POST"])
+def addFileFolder():
+    data = request.get_json()
+    name = data.get("name")
+    is_dir = data.get("is_dir")
+    key = data.get("key")
+
+    if key == "":
+        path = "./api" + "/" + name
+        if not os.path.exists(path):
+            os.makedirs(path)
+    else:
+        path = g.pathHash[key] + "/" + name
+        if is_dir:
+            if not os.path.exists(path):
+                os.makedirs(path)
+        else:
+            file = open(path, "w")
+            file.close()
+
+    return ""
+
+
+# 删除文件或目录
+@g.app.route("/" + consts.ROUTEPRE + "/files/remove", methods=["POST"])
+def removeFileFolder():
+    data = request.get_json()
+    key = data.get("key")
+
+    path = g.pathHash[key]
+
+    if os.path.isdir(path):
+        shutil.rmtree(path) 
+    else:
+        os.remove(path)
+    return ""
+
+# 重命名
+@g.app.route("/" + consts.ROUTEPRE + "/files/rename", methods=["POST"])
+def renameFileFolder():
+    data = request.get_json()
+    key = data.get("key")
+    name = data.get("name")
+
+    path = g.pathHash[key]
+    path = path.split("/")
+    path[-1] = name
+    path = "/".join(path)
+
+    os.rename(g.pathHash[key], path)
+    return ""
